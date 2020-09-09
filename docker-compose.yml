@@ -16,9 +16,8 @@ services:
             - DATABASE_HOST=${DATABASE_HOST}
         ports:
             - ${SERVER_PORT}:${SERVER_PORT}
-        # volumes:
-        #     - ./:/usr/src/app
-        #     - ./:/usr/src/app/node_modules
+        volumes:
+            - ./:/usr/src/app:cached
         command: yarn start:dev
         env_file:
             - .env
@@ -28,7 +27,7 @@ services:
     postgres:
         container_name: postgres
         restart: always
-        image: postgres:12
+        image: postgres:12.4-alpine
         environment:
             POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
             POSTGRES_USER: ${DATABASE_USERNAME}
@@ -38,6 +37,8 @@ services:
             - ${DATABASE_PORT}:${DATABASE_PORT}
         volumes:
             - pgdata:/var/lib/postgresql/data
+        env_file:
+            - .env
         networks:
             - webnet
 
