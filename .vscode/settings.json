@@ -1,0 +1,14 @@
+{
+    "sqltools.connections": [
+        {
+            "database": "db",
+            "driver": "PostgreSQL",
+            "name": "db_backend",
+            "password": "admin",
+            "port": 5432,
+            "previewLimit": 50,
+            "server": "localhost",
+            "username": "admin"
+        }
+    ]
+}
