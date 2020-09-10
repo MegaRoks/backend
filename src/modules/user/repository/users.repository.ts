@@ -9,7 +9,7 @@ import { UserRole } from './../types/userRole.type';
 
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
-    async createUser(createUserDto: CreateUserDto, role: UserRole): Promise<User> {
+    async createUser(createUserDto: CreateUserDto, role: UserRole): Promise<any> {
         const { email, firstName, lastName, password } = createUserDto;
 
         const user = this.create();
@@ -20,11 +20,16 @@ export class UserRepository extends Repository<User> {
         user.confirmationToken = randomBytes(32).toString('hex');
         user.salt = await genSalt();
         user.password = await this.hashPassword(password, user.salt);
+        
         try {
-            await user.save();
-            delete user.password;
-            delete user.salt;
-            return user;
+            const result = await this.createQueryBuilder()
+                .insert()
+                .into(User)
+                .values(user)
+                .returning(['id', 'firstName', 'lastName', 'email'])
+                .execute();
+            
+            return result.generatedMaps[0];
         } catch (error) {
             if (error.code.toString() === '23505') {
                 throw new ConflictException('Email address already in use');

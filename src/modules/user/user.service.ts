@@ -13,11 +13,11 @@ export class UserService {
         private userRepository: UserRepository,
     ) {}
 
-   public async createAdminUser(createUserDto: CreateUserDto): Promise<User> {
-        if (createUserDto.password != createUserDto.passwordConfirmation) {
-            throw new UnprocessableEntityException('Password mismatch');
+    public async createUser(createUserDto: CreateUserDto, role: UserRole): Promise<User> {
+        if (createUserDto.password === createUserDto.passwordConfirmation) {
+            return this.userRepository.createUser(createUserDto, role);
         } else {
-            return this.userRepository.createUser(createUserDto, UserRole.admin);
+            throw new UnprocessableEntityException('Password mismatch');
         }
     }
 }
