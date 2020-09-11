@@ -2,9 +2,9 @@ import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { UserRepository } from './repository/users.repository';
-import { CreateUserDto } from './dto/createUser.dto';
+import { CreateUserDTO } from './dto/createUser.dto';
 import { User } from './entity/user.entity';
-import { UserRole } from './types/userRole.type';
+import { ChangeUserRoleDTO } from './dto/changeUserRole.dto';
 
 @Injectable()
 export class UserService {
@@ -13,11 +13,15 @@ export class UserService {
         private userRepository: UserRepository,
     ) {}
 
-    public async createUser(createUserDto: CreateUserDto, role: UserRole): Promise<User> {
-        if (createUserDto.password === createUserDto.passwordConfirmation) {
-            return this.userRepository.createUser(createUserDto, role);
+    public async createUser(createUserDTO: CreateUserDTO): Promise<User> {
+        if (createUserDTO.password === createUserDTO.passwordConfirmation) {
+            return this.userRepository.createUser(createUserDTO);
         } else {
             throw new UnprocessableEntityException('Password mismatch');
         }
+    }
+
+    public async changeUserRole(changeUserRoleDTO: ChangeUserRoleDTO): Promise<User> {
+        return this.userRepository.changeUserRole(changeUserRoleDTO);
     }
 }

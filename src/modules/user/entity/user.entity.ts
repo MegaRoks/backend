@@ -1,6 +1,6 @@
 import { BaseEntity, Entity, Unique, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
 
-import { UserRole } from './../types/userRole.type';
+import { UserRoleType } from './../types/userRole.type';
 
 @Entity()
 @Unique(['email'])
@@ -17,7 +17,7 @@ export class User extends BaseEntity {
     @Column({ nullable: false, type: 'varchar', length: 200 })
     public lastName: string;
 
-    @Column({ type: 'enum', enum: UserRole, default: 'user' })
+    @Column({ type: 'enum', enum: UserRoleType, default: 'user' })
     public role: string;
 
     @Column({ nullable: false, type: 'boolean', default: false })

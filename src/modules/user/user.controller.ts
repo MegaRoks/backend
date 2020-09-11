@@ -1,11 +1,12 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Put } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiTags, ApiBody } from '@nestjs/swagger';
 
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/createUser.dto';
-import { ReturnUserDto } from './dto/returnUser.dto';
+import { CreateUserDTO } from './dto/createUser.dto';
+import { ReturnUserDTO } from './dto/returnUser.dto';
+import { ChangeUserRoleDTO } from './dto/changeUserRole.dto';
 import { createUser } from './schema/createUser.schema';
-import { UserRole } from './types/userRole.type';
+import { changeUserRole } from './schema/changeUserRole.schema';
 
 @ApiTags('user')
 @ApiBearerAuth()
@@ -13,31 +14,31 @@ import { UserRole } from './types/userRole.type';
 export class UserController {
     constructor(private usersService: UserService) {}
 
-    @Post('/create-admin')
-    @ApiOkResponse({
-        type: ReturnUserDto,
-        description: 'The method for create admins',
-    })
-    @ApiBody({ schema: createUser })
-    public async createAdmin(@Body() createUserDto: CreateUserDto): Promise<ReturnUserDto> {
-        const user = await this.usersService.createUser(createUserDto, UserRole.admin);
-        return {
-            user,
-            message: 'Administrator registered successfully',
-        };
-    }
-
     @Post('/create-user')
     @ApiOkResponse({
-        type: ReturnUserDto,
+        type: ReturnUserDTO,
         description: 'The method for create users',
     })
     @ApiBody({ schema: createUser })
-    public async createUser(@Body() createUserDto: CreateUserDto): Promise<ReturnUserDto> {
-        const user = await this.usersService.createUser(createUserDto, UserRole.user);
+    public async createUser(@Body() createUserDTO: CreateUserDTO): Promise<ReturnUserDTO> {
+        const user = await this.usersService.createUser(createUserDTO);
         return {
             user,
             message: 'User registered successfully',
+        };
+    }
+
+    @Put('/change-user-role')
+    @ApiOkResponse({
+        type: ReturnUserDTO,
+        description: 'The method for change role of user',
+    })
+    @ApiBody({ schema: changeUserRole })
+    public async changeUserRole(@Body() changeUserRoleDTO: ChangeUserRoleDTO): Promise<ReturnUserDTO> {
+        const user = await this.usersService.changeUserRole(changeUserRoleDTO);
+        return {
+            user,
+            message: 'User role changed successfully',
         };
     }
 }
