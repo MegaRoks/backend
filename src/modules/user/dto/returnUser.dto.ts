@@ -1,6 +1,6 @@
 import { User } from './../entity/user.entity';
 
 export class ReturnUserDTO {
-    user: User;
-    message: string;
+    public user: User;
+    public message: string;
 }

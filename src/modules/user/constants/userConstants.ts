@@ -1,0 +1,1 @@
+export const passwordLength = 7;

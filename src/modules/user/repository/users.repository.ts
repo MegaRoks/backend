@@ -42,26 +42,26 @@ export class UserRepository extends Repository<User> {
         return hash(password, salt);
     }
 
-    public async changeUserRole(changeUserRoleDTO: ChangeUserRoleDTO): Promise<User> {
+    public async changeUserRole(userId: string, changeUserRoleDTO: ChangeUserRoleDTO): Promise<User> {
         const user = await this.createQueryBuilder()
             .select(['u.id', 'u.role'])
             .from(User, 'u')
-            .where('u.id = :userId', { userId: changeUserRoleDTO.id })
+            .where('u.id = :userId', { userId })
             .getOne();
-        
+
         if (user) {
             try {
                 const result = await this.createQueryBuilder()
                     .update(User)
                     .set({ role: changeUserRoleDTO.role })
-                    .where('id = :userId', { userId: changeUserRoleDTO.id })
+                    .where('id = :userId', { userId })
                     .returning(['id', 'firstName', 'lastName', 'email'])
                     .execute();
 
                 return Object.assign(result.raw[0]);
             } catch (error) {
                 if (error.code.toString() === '22P02') {
-                    throw new ConflictException(`Role named ${changeUserRoleDTO.role} cannot be assigned to user ${changeUserRoleDTO.id}`);
+                    throw new ConflictException(`Role named ${changeUserRoleDTO.role} cannot be assigned to user ${userId}`);
                 } else {
                     throw new InternalServerErrorException('Error while saving user to database');
                 }

@@ -21,7 +21,7 @@ export class UserService {
         }
     }
 
-    public async changeUserRole(changeUserRoleDTO: ChangeUserRoleDTO): Promise<User> {
-        return this.userRepository.changeUserRole(changeUserRoleDTO);
+    public async changeUserRole(id: string, changeUserRoleDTO: ChangeUserRoleDTO): Promise<User> {
+        return this.userRepository.changeUserRole(id, changeUserRoleDTO);
     }
 }
