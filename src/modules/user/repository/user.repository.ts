@@ -1,24 +1,15 @@
-import { ConflictException, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { ConflictException, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { EntityRepository, Repository } from 'typeorm';
-import { genSalt, hash } from 'bcryptjs';
-import { randomBytes } from 'crypto';
 
 import { User } from './../entity/user.entity';
 import { CreateUserDTO } from './../dto/createUser.dto';
 import { ChangeUserRoleDTO } from './../dto/changeUserRole.dto';
+import { CredentialsDto } from 'src/modules/auth/dto/credentials.dto';
 
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
     public async createUser(createUserDTO: CreateUserDTO): Promise<User> {
-        const { email, firstName, lastName, password } = createUserDTO;
-
-        const user = this.create();
-        user.email = email;
-        user.firstName = firstName;
-        user.lastName = lastName;
-        user.confirmationToken = randomBytes(32).toString('hex');
-        user.salt = await genSalt();
-        user.password = await this.hashPassword(password, user.salt);
+        const user = this.create(createUserDTO);
 
         try {
             const result = await this.createQueryBuilder()
@@ -38,16 +29,32 @@ export class UserRepository extends Repository<User> {
         }
     }
 
-    private async hashPassword(password: string, salt: string): Promise<string> {
-        return hash(password, salt);
+    public async checkCredentials(credentialsDto: CredentialsDto): Promise<User> {
+        const { email, password } = credentialsDto;
+
+        const user = await this.createQueryBuilder()
+            .select(['u.id', 'u.email', 'u.password', 'u.salt'])
+            .from(User, 'u')
+            .where('u.email = :email', { email })
+            .andWhere('u.isActive = :isActive', { isActive: true })
+            .getOne();
+
+        console.log(user);
+
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        const isCheckPassword = await user.checkPassword(password);
+        if (user && isCheckPassword) {
+            return await this.getUserById(user.id);
+        } else {
+            throw new UnauthorizedException('Invalid credentials');
+        }
     }
 
     public async changeUserRole(userId: string, changeUserRoleDTO: ChangeUserRoleDTO): Promise<User> {
-        const user = await this.createQueryBuilder()
-            .select(['u.id', 'u.role'])
-            .from(User, 'u')
-            .where('u.id = :userId', { userId })
-            .getOne();
+        const user = await this.getUserById(userId);
 
         if (user) {
             try {
@@ -69,5 +76,13 @@ export class UserRepository extends Repository<User> {
         } else {
             throw new NotFoundException('User not found');
         }
+    }
+
+    private async getUserById(userId: string) {
+        return await this.createQueryBuilder()
+            .select(['u.id', 'u.firstName', 'u.lastName', 'u.email', 'u.role'])
+            .from(User, 'u')
+            .where('u.id = :userId', { userId })
+            .getOne();
     }
 }

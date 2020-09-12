@@ -1,5 +1,6 @@
-import { Controller, Post, Body, Put, ValidationPipe, Param } from '@nestjs/common';
+import { Controller, Post, Body, Put, ValidationPipe, Param, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiTags, ApiBody } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 
 import { UserService } from './user.service';
 import { CreateUserDTO } from './dto/createUser.dto';
@@ -7,6 +8,8 @@ import { ReturnUserDTO } from './dto/returnUser.dto';
 import { ChangeUserRoleDTO } from './dto/changeUserRole.dto';
 import { createUser } from './schema/createUser.schema';
 import { changeUserRole } from './schema/changeUserRole.schema';
+import { Role } from '../auth/decorators/role.decorator';
+import { UserRoleType } from './types/userRole.type';
 
 @ApiTags('user')
 @ApiBearerAuth()
@@ -29,6 +32,8 @@ export class UserController {
     }
 
     @Put('/change-user-role/:id')
+    @Role(UserRoleType.ADMIN)
+    @UseGuards(AuthGuard())
     @ApiOkResponse({
         type: ReturnUserDTO,
         description: 'The method for change role of user',

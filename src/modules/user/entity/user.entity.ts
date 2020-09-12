@@ -1,4 +1,6 @@
-import { BaseEntity, Entity, Unique, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
+import { BaseEntity, Entity, Unique, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, BeforeInsert } from 'typeorm';
+import { hash, genSalt } from 'bcryptjs';
+import { randomBytes } from 'crypto';
 
 import { UserRoleType } from './../types/userRole.type';
 
@@ -17,10 +19,10 @@ export class User extends BaseEntity {
     @Column({ nullable: false, type: 'varchar', length: 200 })
     public lastName: string;
 
-    @Column({ type: 'enum', enum: UserRoleType, default: 'user' })
+    @Column({ type: 'enum', enum: UserRoleType, default: 'admin' })
     public role: string;
 
-    @Column({ nullable: false, type: 'boolean', default: false })
+    @Column({ nullable: false, type: 'boolean', default: true })
     public isActive: boolean;
 
     @Column({ nullable: false })
@@ -43,4 +45,25 @@ export class User extends BaseEntity {
 
     @DeleteDateColumn()
     public deletedAt: Date;
+
+    @BeforeInsert()
+    private async setHashPassword(): Promise<void> {
+        const salt = await genSalt();
+        this.password = await hash(this.password, salt);
+    }
+
+    @BeforeInsert()
+    private async setSaltPassword(): Promise<void> {
+        this.salt = await genSalt();
+    }
+
+    @BeforeInsert()
+    private async setConfirmationToken(): Promise<void> {
+        this.confirmationToken = randomBytes(32).toString('hex');
+    }
+
+    public async checkPassword(password: string): Promise<boolean> {
+        const newHash = await hash(password, this.salt);
+        return newHash === this.password;
+    }
 }
