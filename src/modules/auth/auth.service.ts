@@ -25,7 +25,7 @@ export class AuthService {
             .getOne();
         
         if (!user) {
-                throw new NotFoundException('User not found');
+            throw new NotFoundException('User not found');
         }
         
         const isCheckPassword = await user.checkPassword(password);

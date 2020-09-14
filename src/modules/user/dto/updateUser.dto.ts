@@ -22,12 +22,12 @@ export class UpdateUserDTO {
     public email: string;
 
     @IsOptional()
-    @MinLength(maxPasswordLength, { message: `The password must be less than ${maxPasswordLength} characters` })
+    @MaxLength(maxPasswordLength, { message: `The password must be less than ${maxPasswordLength} characters` })
     @MinLength(minPasswordLength, { message: `The password must be more than ${minPasswordLength} characters` })
     public password: string;
 
     @IsOptional()
-    @MinLength(maxPasswordLength, { message: `The confirmation password must be less than ${maxPasswordLength} characters` })
+    @MaxLength(maxPasswordLength, { message: `The confirmation password must be less than ${maxPasswordLength} characters` })
     @MinLength(minPasswordLength, { message: `The confirmation password must be more than ${minPasswordLength} characters` })
     public passwordConfirmation: string;
 

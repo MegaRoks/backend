@@ -9,80 +9,84 @@ import { UpdateUserDTO } from './../dto/updateUser.dto';
 export class UserRepository extends Repository<User> {
     public async createUser(createUserDTO: CreateUserDTO): Promise<User> {
         const user = this.create(createUserDTO);
+        await this.createQueryBuilder()
+            .insert()
+            .into(User)
+            .values(user)
+            .execute()
+            .catch((error) => {
+                if (error.code.toString() === '23505') {
+                    throw new ConflictException('Email address already in use');
+                } else {
+                    throw new InternalServerErrorException('Error while saving user to database');
+                }
+            });
 
-        try {
-            await this.createQueryBuilder()
-                .insert()
-                .into(User)
-                .values(user)
-                .execute();
+        delete user.password;
+        delete user.salt;
+        delete user.confirmationToken;
 
-            return user;
-        } catch (error) {
-            if (error.code.toString() === '23505') {
-                throw new ConflictException('Email address already in use');
-            } else {
-                throw new InternalServerErrorException('Error while saving user to database');
-            }
-        }
+        return user;
     }
 
     public async updateUser(userId: string, updateUserDTO: UpdateUserDTO): Promise<void> {
         const user = this.create(updateUserDTO);
-        
-        try {
-            await this.createQueryBuilder().update(User).set(user).where('id = :userId', { userId }).execute();
-         } catch (error) {
-            throw new InternalServerErrorException('Error while saving user to database');
-        }
+        await this.createQueryBuilder()
+            .update(User)
+            .set(user)
+            .where('id = :userId', { userId })
+            .execute()
+            .catch(() => {
+                throw new InternalServerErrorException('Error while saving user to database');
+            });
     }
 
     public async deleteUser(userId: string): Promise<void> {
-        try {
-            await this.createQueryBuilder()
-                .delete().from(User, 'u')
-                .where('u.id = :userId', { userId })
-                .execute();
-        } catch (error) {
-            throw new InternalServerErrorException('Error while saving user to database');
-        }
+        await this.createQueryBuilder()
+            .delete()
+            .from(User)
+            .where('id = :userId', { userId })
+            .execute()
+            .catch(() => {
+                throw new InternalServerErrorException('Error while saving user to database');
+            });
     }
 
     public async getUserById(userId: string): Promise<User> {
-        try {
-            const user = await this.createQueryBuilder()
-                .select(['u.id', 'u.firstName', 'u.lastName', 'u.email', 'u.isActive', 'u.role'])
-                .from(User, 'u')
-                .where('u.id = :userId', { userId })
-                .andWhere('u.isActive = :isActive', { isActive: true })
-                .getOne();
+        const user = await this.createQueryBuilder()
+            .select(['u.id', 'u.firstName', 'u.lastName', 'u.email', 'u.isActive', 'u.role'])
+            .from(User, 'u')
+            .where('u.id = :userId', { userId })
+            .andWhere('u.isActive = :isActive', { isActive: true })
+            .getOne()
+            .then((user) => user)
+            .catch(() => {
+                throw new InternalServerErrorException('Error while saving user to database');
+            });
 
-            if (!user) {
-                throw new NotFoundException('User not found');
-            }
-
-            return user;
-        } catch (error) {
-            throw new InternalServerErrorException('Error while saving user to database');
+        if (!user) {
+            throw new NotFoundException('User not found');
         }
+
+        return user;
     }
 
-    public async getUserByEmail(userEmail: string): Promise<User> {        
-        try {
-            const user = await this.createQueryBuilder()
-                .select(['u.id', 'u.firstName', 'u.lastName', 'u.email', 'u.isActive', 'u.role'])
-                .from(User, 'u')
-                .where('u.email = :userEmail', { userEmail })
-                .andWhere('u.isActive = :isActive', { isActive: true })
-                .getOne();
+    public async getUserByEmail(userEmail: string): Promise<User> {
+        const user = await this.createQueryBuilder()
+            .select(['u.id', 'u.firstName', 'u.lastName', 'u.email', 'u.isActive', 'u.role'])
+            .from(User, 'u')
+            .where('u.email = :userEmail', { userEmail })
+            .andWhere('u.isActive = :isActive', { isActive: true })
+            .getOne()
+            .then((user) => user)
+            .catch(() => {
+                throw new InternalServerErrorException('Error while saving user to database');
+            });
 
-            if (!user) {
-                throw new NotFoundException('User not found');
-            }
-
-            return user;
-        } catch (error) {
-            throw new InternalServerErrorException('Error while saving user to database');
+        if (!user) {
+            throw new NotFoundException('User not found');
         }
+
+        return user;
     }
 }

@@ -1,4 +1,4 @@
-import { Controller, Post, Body, ValidationPipe, Param, UseGuards, Get, Patch } from '@nestjs/common';
+import { Controller, Post, Body, ValidationPipe, Param, UseGuards, Get, Patch, Delete } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiTags, ApiBody } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -6,6 +6,7 @@ import { UserService } from './user.service';
 import { CreateUserDTO } from './dto/createUser.dto';
 import { ReturnUserDTO } from './dto/returnUser.dto';
 import { UpdateUserDTO } from './dto/updateUser.dto';
+import { DeleteUserDTO } from './dto/deleteUser.dto';
 import { createUserSchema } from './schema/createUser.schema';
 import { changeUserRoleSchema } from './schema/changeUserRole.schema';
 import { updateUserSchema } from './schema/updateUser.schema';
@@ -14,6 +15,7 @@ import { GetUser } from './decorators/get-user.decorator';
 import { RolesGuard } from './../auth/role.guard';
 import { UserRoleType } from './types/userRole.type';
 import { User } from './entity/user.entity';
+
 
 @ApiTags('user')
 @ApiBearerAuth()
@@ -53,12 +55,26 @@ export class UserController {
 
     @Patch('/update-user')
     @ApiOkResponse({
-        type: User,
+        type: ReturnUserDTO,
         description: 'The method for update data of user',
     })
     @ApiBody({ schema: updateUserSchema })
-    public async updateUser(@Body(ValidationPipe) updateUserDTO: UpdateUserDTO, @GetUser() user: User): Promise<User> {
-        return this.usersService.updateUser(user.id, updateUserDTO);
+    public async updateUser(@Body(ValidationPipe) updateUserDTO: UpdateUserDTO, @GetUser() user: User): Promise<ReturnUserDTO> {
+        const updatedUser = await this.usersService.updateUser(user.id, updateUserDTO);
+        return {
+            user: updatedUser,
+            message: 'User updated successfully',
+        };
+    }
+
+    @Delete('/delete-user/:id')
+    @ApiOkResponse({
+        type: DeleteUserDTO,
+        description: 'The method for update data of user',
+    })
+    public async deleteUser(@Param('id') id: string): Promise<DeleteUserDTO> {
+        await this.usersService.deleteUser(id);
+        return { message: 'User deleted successfully' };
     }
 
     @Get('/profile')

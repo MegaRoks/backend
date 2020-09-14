@@ -19,12 +19,12 @@ export class CreateUserDTO {
     public lastName: string;
 
     @IsNotEmpty({ message: 'Enter a password' })
-    @MinLength(maxPasswordLength, { message: `The password must be less than ${maxPasswordLength} characters` })
+    @MaxLength(maxPasswordLength, { message: `The password must be less than ${maxPasswordLength} characters` })
     @MinLength(minPasswordLength, { message: `The password must be more than ${minPasswordLength} characters` })
     public password: string;
 
     @IsNotEmpty({ message: 'Enter a confirmation password' })
-    @MinLength(maxPasswordLength, { message: `The confirmation password must be less than ${maxPasswordLength} characters` })
+    @MaxLength(maxPasswordLength, { message: `The confirmation password must be less than ${maxPasswordLength} characters` })
     @MinLength(minPasswordLength, { message: `The confirmation password must be more than ${minPasswordLength} characters` })
     public passwordConfirmation: string;
 }
