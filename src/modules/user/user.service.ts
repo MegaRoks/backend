@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import { UserRepository } from './repository/user.repository';
 import { CreateUserDTO } from './dto/createUser.dto';
+import { UpdateUserDTO } from './dto/updateUser.dto';
 import { User } from './entity/user.entity';
-import { ChangeUserRoleDTO } from './dto/changeUserRole.dto';
 
 @Injectable()
 export class UserService {
@@ -15,13 +15,37 @@ export class UserService {
 
     public async createUser(createUserDTO: CreateUserDTO): Promise<User> {
         if (createUserDTO.password === createUserDTO.passwordConfirmation) {
-            return this.userRepository.createUser(createUserDTO);
+            return await this.userRepository.createUser(createUserDTO);
         } else {
             throw new UnprocessableEntityException('Password mismatch');
         }
     }
 
-    public async changeUserRole(id: string, changeUserRoleDTO: ChangeUserRoleDTO): Promise<User> {
-        return this.userRepository.changeUserRole(id, changeUserRoleDTO);
+    public async updateUserRole(userId: string, updateUserDTO: UpdateUserDTO): Promise<User> {
+        const user = await this.userRepository.getUserById(userId);
+        const { role } = updateUserDTO;
+
+        user.role = role ? role : user.role;
+
+        return await this.userRepository.updateUser(userId, updateUserDTO).then(() => {
+            return user;
+        });
+    }
+
+    public async updateUser(userId: string, updateUserDTO: UpdateUserDTO): Promise<User> {
+        const user = await this.userRepository.getUserById(userId);
+        const { firstName, lastName, email } = updateUserDTO;
+
+        user.firstName = firstName ? firstName : user.firstName;
+        user.lastName = lastName ? lastName : user.lastName;
+        user.email = email ? email : user.email;
+
+        return await this.userRepository.updateUser(userId, updateUserDTO).then(() => {
+            return user;
+        });
+    }
+
+    public async deleteUser(userId: string) {
+        return await this.userRepository.deleteUser(userId);
     }
 }

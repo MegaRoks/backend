@@ -19,7 +19,7 @@ export class User extends BaseEntity {
     @Column({ nullable: false, type: 'varchar', length: 200 })
     public lastName: string;
 
-    @Column({ type: 'enum', enum: UserRoleType, default: 'admin' })
+    @Column({ type: 'enum', enum: UserRoleType, default: 'user' })
     public role: string;
 
     @Column({ nullable: false, type: 'boolean', default: true })
@@ -47,18 +47,14 @@ export class User extends BaseEntity {
     public deletedAt: Date;
 
     @BeforeInsert()
-    private async setHashPassword(): Promise<void> {
+    private async setHashPasswordAndSalt(): Promise<void> {
         const salt = await genSalt();
+        this.salt = salt;
         this.password = await hash(this.password, salt);
     }
 
     @BeforeInsert()
-    private async setSaltPassword(): Promise<void> {
-        this.salt = await genSalt();
-    }
-
-    @BeforeInsert()
-    private async setConfirmationToken(): Promise<void> {
+    private setConfirmationToken(): void {
         this.confirmationToken = randomBytes(32).toString('hex');
     }
 

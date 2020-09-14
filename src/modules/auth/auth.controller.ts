@@ -1,13 +1,10 @@
-import { Body, Controller, Get, Post, UseGuards, ValidationPipe } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { Body, Controller, Post, ValidationPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
 import { CreateUserDTO } from './../user/dto/createUser.dto';
-import { User } from './../user/entity/user.entity';
 import { AuthService } from './auth.service';
-import { GetUser } from './decorators/get-user.decorator';
 import { CredentialsDto } from './dto/credentials.dto';
-import { SignInUserDTO } from './dto/singInUser.dro';
+import { SignInDTO } from './dto/singIn.dro';
 import { SingUpDTO } from './dto/singUp.dto';
 import { signInSchema } from './schema/signIn.schema';
 import { singUpSchema } from './schema/singUp.schema';
@@ -20,11 +17,11 @@ export class AuthController {
 
     @Post('/sign-in')
     @ApiOkResponse({
-        type: SignInUserDTO,
+        type: SignInDTO,
         description: 'Sign In method',
     })
     @ApiBody({ schema: signInSchema })
-    public async signIn(@Body(ValidationPipe) credentialsDto: CredentialsDto): Promise<SignInUserDTO> {
+    public async signIn(@Body(ValidationPipe) credentialsDto: CredentialsDto): Promise<SignInDTO> {
         return await this.authService.signIn(credentialsDto);
     }
 
@@ -48,11 +45,5 @@ export class AuthController {
     })
     public logout(): string {
         return this.authService.logout();
-    }
-
-    @Get('/me')
-    @UseGuards(AuthGuard())
-    getMe(@GetUser() user: User): User {
-        return user;
     }
 }

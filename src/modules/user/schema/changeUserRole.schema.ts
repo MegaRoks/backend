@@ -1,6 +1,5 @@
-export const changeUserRole = {
+export const changeUserRoleSchema = {
     example: {
-        id: 'string',
         role: 'string',
     },
 };

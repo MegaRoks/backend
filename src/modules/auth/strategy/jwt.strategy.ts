@@ -1,6 +1,6 @@
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { UserRepository } from './../../user/repository/user.repository';
@@ -19,17 +19,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     public async validate({ user }: { user: User }) {
-        const foundUser = await this.userRepository
-            .createQueryBuilder()
-            .select(['u.id', 'u.firstName', 'u.lastName', 'u.email', 'u.isActive', 'u.role'])
-            .from(User, 'u')
-            .where('u.id = :userId', { userId: user.id })
-            .getOne();
-
-        if (!foundUser) {
-            throw new UnauthorizedException('User not found');
-        }
-
-        return foundUser;
+        return this.userRepository.getUserById(user.id);
     }
 }
