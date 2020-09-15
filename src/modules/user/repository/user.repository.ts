@@ -109,6 +109,7 @@ export class UserRepository extends Repository<User> {
         page > 0 && limit < 0 && query.skip((page - 1) * 100);
         page < 0 && limit < 0 && query.skip((1 - 1) * 100);
 
+        // todo added logic for sort parameters
         sort && query.orderBy(JSON.parse(sort));
         
         limit ? query.take(+limit) : query.take(100);
