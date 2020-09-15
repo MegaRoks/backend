@@ -10,19 +10,19 @@ export class TodoGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     private logger: Logger = new Logger('TodoGateway');
 
     @SubscribeMessage('msgToServer')
-    handleMessage(client: Socket, payload: string): void {
+    public handleMessage(client: Socket, payload: string): void {
         this.server.emit('msgToClient', payload);
     }
 
-    afterInit(server: Server) {
+    public afterInit(server: Server) {
         this.logger.log('Init');
     }
 
-    handleDisconnect(client: Socket) {
+    public handleDisconnect(client: Socket) {
         this.logger.log(`Client disconnected: ${client.id}`);
     }
 
-    handleConnection(client: Socket) {
+    public handleConnection(client: Socket) {
         this.logger.log(`Client connected: ${client.id}`);
     }
 }
