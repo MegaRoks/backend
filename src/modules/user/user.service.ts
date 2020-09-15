@@ -50,8 +50,7 @@ export class UserService {
         return await this.userRepository.deleteUser(userId);
     }
 
-    public;
-    async findUsers(queryDto: FindUsersDTO): Promise<{ users: User[]; total: number }> {
+    public async findUsers(queryDto: FindUsersDTO): Promise<{ users: User[]; total: number }> {
        return await this.userRepository.findUsers(queryDto);
     }
 }

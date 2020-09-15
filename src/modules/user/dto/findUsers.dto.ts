@@ -1,6 +1,6 @@
 import { IsOptional, IsBoolean } from 'class-validator';
 
-import { BaseQueryParametersDTO } from './../../shared/dto/BaseQueryParameters.dto';
+import { BaseQueryParametersDTO } from './../../shared/dto/baseQueryParameters.dto';
 import { UserRoleType } from './../types/userRole.type';
 
 export class FindUsersDTO extends BaseQueryParametersDTO {

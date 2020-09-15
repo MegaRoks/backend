@@ -1,5 +1,5 @@
 import { Controller, Post, Body, ValidationPipe, Param, UseGuards, Get, Patch, Delete, Query } from '@nestjs/common';
-import { ApiBearerAuth, ApiOkResponse, ApiTags, ApiBody } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiTags, ApiBody, ApiQuery } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 
 import { UserService } from './user.service';
@@ -86,17 +86,24 @@ export class UserController {
         return user;
     }
 
-    @Get()
+    @Get('/find-users')
     @Role(UserRoleType.ADMIN)
     @ApiOkResponse({
         type: FindUsersDTO,
         description: 'The method for find users',
     })
-    @ApiBody({ schema: updateUserSchema })
-    async findUsers(@Query() query: FindUsersDTO): Promise<{ found: { users: User[]; total: number }; message: string }> {
+    @ApiQuery({ name: 'firstName', required: false })
+    @ApiQuery({ name: 'lastName', required: false })
+    @ApiQuery({ name: 'email', required: false })
+    @ApiQuery({ name: 'isActive', required: false })
+    @ApiQuery({ name: 'role', enum: UserRoleType, required: false })
+    @ApiQuery({ name: 'sort', required: false })
+    @ApiQuery({ name: 'page', required: false })
+    @ApiQuery({ name: 'limit', required: false })
+    async findUsers(@Query() query: FindUsersDTO): Promise<{ users: User[]; total: number; message: string }> {
         const found = await this.usersService.findUsers(query);
         return {
-            found,
+            ...found,
             message: 'Users found',
         };
     }

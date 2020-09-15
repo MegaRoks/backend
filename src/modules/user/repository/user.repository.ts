@@ -15,7 +15,7 @@ export class UserRepository extends Repository<User> {
             .into(User)
             .values(user)
             .execute()
-            .catch(error => {
+            .catch((error) => {
                 if (error.code.toString() === '23505') {
                     throw new ConflictException('Email address already in use');
                 } else {
@@ -60,7 +60,7 @@ export class UserRepository extends Repository<User> {
             .where('u.id = :userId', { userId })
             .andWhere('u.isActive = :isActive', { isActive: true })
             .getOne()
-            .then(user => user)
+            .then((user) => user)
             .catch(() => {
                 throw new InternalServerErrorException('Error while saving user to database');
             });
@@ -79,7 +79,7 @@ export class UserRepository extends Repository<User> {
             .where('u.email = :userEmail', { userEmail })
             .andWhere('u.isActive = :isActive', { isActive: true })
             .getOne()
-            .then(user => user)
+            .then((user) => user)
             .catch(() => {
                 throw new InternalServerErrorException('Error while saving user to database');
             });
@@ -92,25 +92,26 @@ export class UserRepository extends Repository<User> {
     }
 
     public async findUsers(queryDTO: FindUsersDTO): Promise<{ users: User[]; total: number }> {
-        const { firstName, lastName, email, isActive, role, sort } = queryDTO;
+        const { firstName, lastName, email, isActive, role, sort, page, limit } = queryDTO;
         const query = this.createQueryBuilder();
-        query.from(User, 'u');
-        
-        queryDTO.page && queryDTO.page > 0 ? queryDTO.page : 1;
-        queryDTO.limit && queryDTO.limit > 0 ? queryDTO.limit : 100;
 
-        isActive ? query.where('u.isActive = :isActive', { isActive }) : query.where('user.isActive = :isActive', { isActive: true });
+        query.select(['u.id', 'u.firstName', 'u.lastName', 'u.email', 'u.role', 'u.isActive']);
+        query.from(User, 'u');
+
+        isActive ? query.where('u.isActive = :isActive', { isActive }) : query.where('u.isActive = :isActive', { isActive: true });
 
         email && query.andWhere('u.email ILIKE :email', { email: `%${email}%` });
         firstName && query.andWhere('u.firstName ILIKE :firstName', { firstName: `%${firstName}%` });
         lastName && query.andWhere('u.lastName ILIKE :lastName', { lastName: `%${lastName}%` });
         role && query.andWhere('u.role = :role', { role });
-        
-        sort && query.orderBy(JSON.parse(sort));
 
-        query.select(['u.id', 'u.firstName', 'u.lastName', 'u.email', 'u.role', 'u.isActive']);
-        query.skip((queryDTO.page - 1) * queryDTO.limit);
-        query.take(+queryDTO.limit);
+        page > 0 && limit > 0 && query.skip((page - 1) * limit);
+        page > 0 && limit < 0 && query.skip((page - 1) * 100);
+        page < 0 && limit < 0 && query.skip((1 - 1) * 100);
+
+        sort && query.orderBy(JSON.parse(sort));
+        
+        limit ? query.take(+limit) : query.take(100);
 
         const [users, total] = await query.getManyAndCount();
 
