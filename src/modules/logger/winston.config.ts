@@ -12,6 +12,7 @@ export const winstonConfig: WinstonModuleOptions = {
             level: 'verbose',
             filename: 'application.log',
             dirname: 'logs',
+            maxsize: 104857600, // 100MB
         }),
     ],
 };

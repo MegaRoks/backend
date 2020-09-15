@@ -7,7 +7,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         TypeOrmModule.forRootAsync({
             imports: [ConfigModule],
             inject: [ConfigService],
-            useFactory: configService => ({
+            useFactory: (configService) => ({
                 type: configService.get('DATABASE_TYPE'),
                 host: configService.get('DATABASE_HOST'),
                 port: configService.get('DATABASE_PORT'),
@@ -16,12 +16,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
                 database: configService.get('DATABASE_NAME'),
                 entities: ['./dist/**/*.entity.{js,ts}'],
                 synchronize: true,
-                // logging: true,
-                // migrationsRun: false,
-                // migrations: ['./dist/modules/database/migration/*.{js,ts}'],
-                // cli: {
-                //     migrationsDir: 'src/modules/database/migration',
-                // },
+                logging: false,
+                migrationsRun: false,
+                migrations: ['./dist/modules/database/migration/*.{js,ts}'],
+                cli: {
+                    migrationsDir: 'src/modules/database/migration',
+                },
             }),
         }),
     ],

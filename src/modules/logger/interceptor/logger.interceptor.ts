@@ -1,13 +1,14 @@
 import { Injectable, Inject, NestInterceptor, CallHandler, ExecutionContext } from '@nestjs/common';
 import { Logger } from 'winston';
 import { Observable } from 'rxjs';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 
 @Injectable()
 export class LoggerInterceptor implements NestInterceptor {
-    constructor(@Inject('winston') private logger: Logger) {}
+    constructor(@Inject(WINSTON_MODULE_PROVIDER) private logger: Logger) {}
 
     public intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-        this.log(context.switchToHttp().getRequest());   
+        this.log(context.switchToHttp().getRequest());
         return next.handle();
     }
 
@@ -17,7 +18,7 @@ export class LoggerInterceptor implements NestInterceptor {
         delete body.passwordConfirmation;
         const user = (req as any).user;
         const userEmail = user ? user.email : null;
-        this.logger.info({
+        const data = {
             timestamp: new Date().toISOString(),
             method: req.method,
             route: req.route.path,
@@ -28,6 +29,9 @@ export class LoggerInterceptor implements NestInterceptor {
             },
             from: req.ip,
             madeBy: userEmail,
-        });
+        };
+        console.log(data);
+
+        this.logger.info(data);
     }
 }
