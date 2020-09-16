@@ -1,4 +1,14 @@
-import { BaseEntity, Entity, Unique, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, BeforeInsert } from 'typeorm';
+import {
+    BaseEntity,
+    Entity,
+    Unique,
+    PrimaryGeneratedColumn,
+    Column,
+    CreateDateColumn,
+    UpdateDateColumn,
+    DeleteDateColumn,
+    BeforeInsert,
+} from 'typeorm';
 import { hash, genSalt } from 'bcryptjs';
 import { randomBytes } from 'crypto';
 
@@ -22,7 +32,7 @@ export class User extends BaseEntity {
     @Column({ type: 'enum', enum: UserRoleType, default: 'user' })
     public role: string;
 
-    @Column({ nullable: false, type: 'boolean', default: true })
+    @Column({ nullable: false, type: 'boolean', default: false })
     public isActive: boolean;
 
     @Column({ nullable: false })
@@ -56,6 +66,17 @@ export class User extends BaseEntity {
     @BeforeInsert()
     private setConfirmationToken(): void {
         this.confirmationToken = randomBytes(32).toString('hex');
+    }
+
+    public getRecoverToken(): string {
+        return randomBytes(32).toString('hex');
+    }
+
+    public async getPasswordAndSalt(newPassword: string): Promise<{ salt: string; password: string }> {
+        const salt = await genSalt();
+        const password = await hash(newPassword, salt);
+
+        return { salt, password };
     }
 
     public async checkPassword(password: string): Promise<boolean> {

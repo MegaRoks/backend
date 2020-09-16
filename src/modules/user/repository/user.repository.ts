@@ -25,7 +25,6 @@ export class UserRepository extends Repository<User> {
 
         delete user.password;
         delete user.salt;
-        delete user.confirmationToken;
 
         return user;
     }
@@ -59,6 +58,42 @@ export class UserRepository extends Repository<User> {
             .from(User, 'u')
             .where('u.id = :userId', { userId })
             .andWhere('u.isActive = :isActive', { isActive: true })
+            .getOne()
+            .then((user) => user)
+            .catch(() => {
+                throw new InternalServerErrorException('Error while saving user to database');
+            });
+
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        return user;
+    }
+
+    public async getUserByConfirmationToken(confirmationToken: string): Promise<User> {
+        const user = await this.createQueryBuilder()
+            .select(['u.id', 'u.firstName', 'u.lastName', 'u.email', 'u.isActive', 'u.role'])
+            .from(User, 'u')
+            .where('u.confirmationToken = :confirmationToken', { confirmationToken })
+            .getOne()
+            .then((user) => user)
+            .catch(() => {
+                throw new InternalServerErrorException('Error while saving user to database');
+            });
+
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        return user;
+    }
+
+    public async getUserByRecoverToken(recoverToken: string): Promise<User> {
+        const user = await this.createQueryBuilder()
+            .select(['u.id', 'u.firstName', 'u.lastName', 'u.email', 'u.isActive', 'u.role'])
+            .from(User, 'u')
+            .where('u.recoverToken = :recoverToken', { recoverToken })
             .getOne()
             .then((user) => user)
             .catch(() => {
@@ -111,7 +146,7 @@ export class UserRepository extends Repository<User> {
 
         // todo added logic for sort parameters
         sort && query.orderBy(JSON.parse(sort));
-        
+
         limit ? query.take(+limit) : query.take(100);
 
         const [users, total] = await query.getManyAndCount();

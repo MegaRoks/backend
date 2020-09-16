@@ -6,9 +6,10 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { TodoModule } from './modules/todo/todo.module';
 import { LoggerModule } from './modules/logger/logger.module';
+import { MailModule } from './modules/mail/mail.module';
 
 @Module({
-    imports: [ConfigModule.forRoot(), DatabaseModule, AuthModule, UserModule, TodoModule, LoggerModule],
+    imports: [ConfigModule.forRoot(), DatabaseModule, AuthModule, UserModule, TodoModule, LoggerModule, MailModule],
     controllers: [],
     providers: [],
 })

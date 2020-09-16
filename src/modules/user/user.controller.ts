@@ -24,7 +24,7 @@ import { User } from './entity/user.entity';
 export class UserController {
     constructor(private usersService: UserService) {}
 
-    @Post('/create-user')
+    @Post('/create')
     @ApiOkResponse({
         type: ReturnUserDTO,
         description: 'The method for create users',
@@ -38,7 +38,7 @@ export class UserController {
         };
     }
 
-    @Patch('/update-user-role/:id')
+    @Patch('/update-role/:id')
     @Role(UserRoleType.ADMIN)
     @ApiOkResponse({
         type: ReturnUserDTO,
@@ -53,7 +53,7 @@ export class UserController {
         };
     }
 
-    @Patch('/update-user')
+    @Patch('/update')
     @ApiOkResponse({
         type: ReturnUserDTO,
         description: 'The method for update data of user',
@@ -67,7 +67,7 @@ export class UserController {
         };
     }
 
-    @Delete('/delete-user/:id')
+    @Delete('/delete/:id')
     @ApiOkResponse({
         type: DeleteUserDTO,
         description: 'The method for update data of user',
@@ -86,7 +86,7 @@ export class UserController {
         return user;
     }
 
-    @Get('/find-users')
+    @Get('/search')
     @Role(UserRoleType.ADMIN)
     @ApiOkResponse({
         type: FindUsersDTO,
@@ -100,7 +100,7 @@ export class UserController {
     @ApiQuery({ name: 'sort', required: false })
     @ApiQuery({ name: 'page', required: false })
     @ApiQuery({ name: 'limit', required: false })
-    async findUsers(@Query() query: FindUsersDTO): Promise<{ users: User[]; total: number; message: string }> {
+    public async findUsers(@Query() query: FindUsersDTO): Promise<{ users: User[]; total: number; message: string }> {
         const found = await this.usersService.findUsers(query);
         return {
             ...found,

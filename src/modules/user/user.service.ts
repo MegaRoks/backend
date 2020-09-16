@@ -1,10 +1,10 @@
 import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
+import { User } from './entity/user.entity';
 import { UserRepository } from './repository/user.repository';
 import { CreateUserDTO } from './dto/createUser.dto';
 import { UpdateUserDTO } from './dto/updateUser.dto';
-import { User } from './entity/user.entity';
 import { FindUsersDTO } from './dto/findUsers.dto';
 
 @Injectable()
@@ -50,7 +50,7 @@ export class UserService {
         return await this.userRepository.deleteUser(userId);
     }
 
-    public async findUsers(queryDto: FindUsersDTO): Promise<{ users: User[]; total: number }> {
-       return await this.userRepository.findUsers(queryDto);
+    public async findUsers(queryDTO: FindUsersDTO): Promise<{ users: User[]; total: number }> {
+        return await this.userRepository.findUsers(queryDTO);
     }
 }
