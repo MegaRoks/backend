@@ -21,13 +21,7 @@ export class AuthService {
 
     public async signIn(credentialsDTO: CredentialsDTO): Promise<{ token: string }> {
         const { email, password } = credentialsDTO;
-        const user = await this.userRepository
-            .createQueryBuilder()
-            .select(['u.id', 'u.firstName', 'u.lastName', 'u.email', 'u.isActive', 'u.role', 'u.salt', 'u.password'])
-            .from(User, 'u')
-            .where('u.email = :email', { email })
-            .andWhere('u.isActive = :isActive', { isActive: true })
-            .getOne();
+        const user = await this.userRepository.getUserByEmailWithCredentials(email);
 
         if (!user) {
             throw new NotFoundException('User not found');
@@ -54,7 +48,7 @@ export class AuthService {
                 to: user.email,
                 from: process.env.COMPANY_EMAIL,
                 subject: 'Confirmation email',
-                template: 'email-confirmation',
+                template: 'confirmation-email',
                 context: {
                     token: user.confirmationToken,
                     url: process.env.SERVER_URL,
@@ -85,12 +79,12 @@ export class AuthService {
 
     public async resetPasswordUser(email: string): Promise<{ message: string }> {
         const user = await this.userRepository.getUserByEmail(email);
-        const recoverToken = user.getRecoverToken();
+        const recoverToken = user.getRandomStringBytes();
         const updateUserDTO: UpdateUserDTO = { recoverToken };
         const mail: ISendMailOptions = {
             to: user.email,
             from: process.env.COMPANY_EMAIL,
-            subject: 'Password reset',
+            subject: 'Reset password',
             template: 'reset-password',
             context: {
                 token: recoverToken,
@@ -119,7 +113,7 @@ export class AuthService {
                 to: user.email,
                 from: process.env.COMPANY_EMAIL,
                 subject: 'Changed password',
-                template: 'change-password',
+                template: 'changed-password',
             };
             await this.mailerService.sendMail(mail).catch((error) => console.error('error', error));
             await this.userRepository.updateUser(user.id, updateUserDTO);

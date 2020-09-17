@@ -153,4 +153,23 @@ export class UserRepository extends Repository<User> {
 
         return { users, total };
     }
+
+    public async getUserByEmailWithCredentials(email: string) {
+        const user = this.createQueryBuilder()
+            .select(['u.id', 'u.firstName', 'u.lastName', 'u.email', 'u.isActive', 'u.role', 'u.salt', 'u.password'])
+            .from(User, 'u')
+            .where('u.email = :email', { email })
+            .andWhere('u.isActive = :isActive', { isActive: true })
+            .getOne()
+            .then((user) => user)
+            .catch(() => {
+                throw new InternalServerErrorException('Error while saving user to database');
+            });
+
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        return user;
+    }
 }

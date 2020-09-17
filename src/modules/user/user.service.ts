@@ -1,5 +1,6 @@
 import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ISendMailOptions, MailerService } from '@nestjs-modules/mailer';
 
 import { User } from './entity/user.entity';
 import { UserRepository } from './repository/user.repository';
@@ -12,6 +13,7 @@ export class UserService {
     constructor(
         @InjectRepository(UserRepository)
         private userRepository: UserRepository,
+        private mailerService: MailerService,
     ) {}
 
     public async createUser(createUserDTO: CreateUserDTO): Promise<User> {
@@ -24,30 +26,61 @@ export class UserService {
 
     public async updateUserRole(userId: string, updateUserDTO: UpdateUserDTO): Promise<User> {
         const user = await this.userRepository.getUserById(userId);
-        const { role } = updateUserDTO;
-
-        user.role = role ? role : user.role;
-
-        return await this.userRepository.updateUser(userId, updateUserDTO).then(() => {
+        return await this.userRepository.updateUser(user.id, updateUserDTO).then(() => {
             return user;
         });
     }
 
     public async updateUser(userId: string, updateUserDTO: UpdateUserDTO): Promise<User> {
         const user = await this.userRepository.getUserById(userId);
-        const { firstName, lastName, email } = updateUserDTO;
 
-        user.firstName = firstName ? firstName : user.firstName;
-        user.lastName = lastName ? lastName : user.lastName;
-        user.email = email ? email : user.email;
+        if (updateUserDTO.email) {
+            const confirmationToken = user.getRandomStringBytes();
+            const mail: ISendMailOptions = {
+                to: updateUserDTO.email,
+                from: process.env.COMPANY_EMAIL,
+                subject: 'Confirmation email',
+                template: 'confirmation-email',
+                context: {
+                    token: confirmationToken,
+                    url: process.env.SERVER_URL,
+                },
+            };
+            await this.mailerService.sendMail(mail).catch((error) => console.error('error', error));
+            updateUserDTO.confirmationToken = confirmationToken;
+        }
 
-        return await this.userRepository.updateUser(userId, updateUserDTO).then(() => {
+        if (updateUserDTO.password && updateUserDTO.passwordConfirmation) {
+            if (updateUserDTO.password === updateUserDTO.passwordConfirmation) {
+                const recoverToken = user.getRandomStringBytes();
+                const mail: ISendMailOptions = {
+                    to: updateUserDTO.email ? updateUserDTO.email : user.email,
+                    from: process.env.COMPANY_EMAIL,
+                    subject: 'Reset password',
+                    template: 'reset-password',
+                    context: {
+                        token: recoverToken,
+                        url: process.env.SERVER_URL,
+                    },
+                };
+                await this.mailerService.sendMail(mail).catch((error) => console.error('error', error));
+                const { password, salt } = await user.getPasswordAndSalt(updateUserDTO.password);
+                updateUserDTO.recoverToken = recoverToken;
+                updateUserDTO.password = password;
+                updateUserDTO.salt = salt;
+            } else {
+                throw new UnprocessableEntityException('Password mismatch');
+            }
+        }
+
+        return await this.userRepository.updateUser(user.id, updateUserDTO).then(() => {
             return user;
         });
     }
 
     public async deleteUser(userId: string) {
-        return await this.userRepository.deleteUser(userId);
+        const user = await this.userRepository.getUserById(userId);
+        return await this.userRepository.deleteUser(user.id);
     }
 
     public async findUsers(queryDTO: FindUsersDTO): Promise<{ users: User[]; total: number }> {

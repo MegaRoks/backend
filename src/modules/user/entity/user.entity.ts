@@ -68,7 +68,7 @@ export class User extends BaseEntity {
         this.confirmationToken = randomBytes(32).toString('hex');
     }
 
-    public getRecoverToken(): string {
+    public getRandomStringBytes(): string {
         return randomBytes(32).toString('hex');
     }
 
