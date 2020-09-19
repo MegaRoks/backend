@@ -7,9 +7,11 @@ import { JwtStrategy } from './strategy/jwt.strategy';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UserRepository } from './../user/repository/user.repository';
+import { MailModule } from './../mail/mail.module';
 
 @Module({
     imports: [
+        MailModule,
         TypeOrmModule.forFeature([UserRepository]),
         PassportModule.register({ defaultStrategy: 'jwt' }),
         JwtModule.register({

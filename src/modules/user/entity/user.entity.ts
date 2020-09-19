@@ -8,13 +8,15 @@ import {
     UpdateDateColumn,
     DeleteDateColumn,
     BeforeInsert,
+    OneToMany,
 } from 'typeorm';
 import { hash, genSalt } from 'bcryptjs';
 import { randomBytes } from 'crypto';
 
 import { UserRoleType } from './../types/userRole.type';
+import { Todo } from './../../todo/entity/todo.entity';
 
-@Entity()
+@Entity('users')
 @Unique(['email'])
 export class User extends BaseEntity {
     @PrimaryGeneratedColumn('uuid')
@@ -46,6 +48,9 @@ export class User extends BaseEntity {
 
     @Column({ nullable: true, type: 'varchar', length: 64 })
     public recoverToken: string;
+
+    @OneToMany(() => Todo, (todo: Todo) => todo.user, { cascade: ['remove'] })
+    public todos: Todo[];
 
     @CreateDateColumn()
     public createdAt: Date;

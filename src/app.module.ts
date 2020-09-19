@@ -10,7 +10,5 @@ import { MailModule } from './modules/mail/mail.module';
 
 @Module({
     imports: [ConfigModule.forRoot(), DatabaseModule, AuthModule, UserModule, TodoModule, LoggerModule, MailModule],
-    controllers: [],
-    providers: [],
 })
 export class AppModule {}

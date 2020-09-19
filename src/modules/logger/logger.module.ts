@@ -7,7 +7,6 @@ import { LoggerInterceptor } from './interceptor/logger.interceptor';
 
 @Module({
     imports: [WinstonModule.forRoot(winstonConfig)],
-    controllers: [],
     providers: [
         {
             provide: APP_INTERCEPTOR,

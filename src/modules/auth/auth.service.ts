@@ -1,4 +1,3 @@
-import { ISendMailOptions, MailerService } from '@nestjs-modules/mailer';
 import { Injectable, NotFoundException, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -9,6 +8,7 @@ import { CredentialsDTO } from './dto/credentials.dto';
 import { ChangePasswordDTO } from './dto/changePassword.dto';
 import { CreateUserDTO } from './../user/dto/createUser.dto';
 import { UpdateUserDTO } from './../user/dto/updateUser.dto';
+import { MailService } from './../mail/mail.service';
 
 @Injectable()
 export class AuthService {
@@ -16,7 +16,7 @@ export class AuthService {
         @InjectRepository(UserRepository)
         private userRepository: UserRepository,
         private jwtService: JwtService,
-        private mailerService: MailerService,
+        private mailService: MailService,
     ) {}
 
     public async signIn(credentialsDTO: CredentialsDTO): Promise<{ token: string }> {
@@ -44,17 +44,9 @@ export class AuthService {
     public async signUp(createUserDTO: CreateUserDTO): Promise<User> {
         if (createUserDTO.password === createUserDTO.passwordConfirmation) {
             const user = await this.userRepository.createUser(createUserDTO);
-            const mail: ISendMailOptions = {
-                to: user.email,
-                from: process.env.COMPANY_EMAIL,
-                subject: 'Confirmation email',
-                template: 'confirmation-email',
-                context: {
-                    token: user.confirmationToken,
-                    url: process.env.SERVER_URL,
-                },
-            };
-            await this.mailerService.sendMail(mail).catch((error) => console.error('error', error));
+
+            await this.mailService.sendMailAboutMailConfirming(user.email, user.confirmationToken);
+
             return user;
         } else {
             throw new UnprocessableEntityException('Passwords do not match');
@@ -71,33 +63,21 @@ export class AuthService {
             confirmationToken: null,
             isActive: true,
         };
+
         await this.userRepository.updateUser(user.id, updateUserDTO);
-        return {
-            message: 'Email successfully confirmed',
-        };
+
+        return { message: 'Email successfully confirmed' };
     }
 
     public async resetPasswordUser(email: string): Promise<{ message: string }> {
         const user = await this.userRepository.getUserByEmail(email);
         const recoverToken = user.getRandomStringBytes();
         const updateUserDTO: UpdateUserDTO = { recoverToken };
-        const mail: ISendMailOptions = {
-            to: user.email,
-            from: process.env.COMPANY_EMAIL,
-            subject: 'Reset password',
-            template: 'reset-password',
-            context: {
-                token: recoverToken,
-                url: process.env.SERVER_URL,
-            },
-        };
 
-        await this.mailerService.sendMail(mail);
+        await this.mailService.sendMailAboutPasswordChanging(user.email, recoverToken);
         await this.userRepository.updateUser(user.id, updateUserDTO);
 
-        return {
-            message: 'An email was sent with instructions on how to reset your password',
-        };
+        return { message: 'An email was sent with instructions on how to reset your password' };
     }
 
     public async changePasswordUser(recoverToken: string, changePasswordDTO: ChangePasswordDTO): Promise<{ message: string }> {
@@ -109,18 +89,11 @@ export class AuthService {
                 password,
                 salt,
             };
-            const mail: ISendMailOptions = {
-                to: user.email,
-                from: process.env.COMPANY_EMAIL,
-                subject: 'Changed password',
-                template: 'changed-password',
-            };
-            await this.mailerService.sendMail(mail).catch((error) => console.error('error', error));
+
+            await this.mailService.sendMailAboutPasswordIsChanged(user.email);
             await this.userRepository.updateUser(user.id, updateUserDTO);
 
-            return {
-                message: 'Password changed successfully',
-            };
+            return { message: 'Password changed successfully' };
         } else {
             throw new UnprocessableEntityException('Passwords do not match');
         }

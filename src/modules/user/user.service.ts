@@ -1,19 +1,19 @@
 import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ISendMailOptions, MailerService } from '@nestjs-modules/mailer';
 
 import { User } from './entity/user.entity';
 import { UserRepository } from './repository/user.repository';
 import { CreateUserDTO } from './dto/createUser.dto';
 import { UpdateUserDTO } from './dto/updateUser.dto';
 import { FindUsersDTO } from './dto/findUsers.dto';
+import { MailService } from './../mail/mail.service';
 
 @Injectable()
 export class UserService {
     constructor(
         @InjectRepository(UserRepository)
-        private userRepository: UserRepository,
-        private mailerService: MailerService,
+        private readonly userRepository: UserRepository,
+        private readonly mailService: MailService,
     ) {}
 
     public async createUser(createUserDTO: CreateUserDTO): Promise<User> {
@@ -26,9 +26,10 @@ export class UserService {
 
     public async updateUserRole(userId: string, updateUserDTO: UpdateUserDTO): Promise<User> {
         const user = await this.userRepository.getUserById(userId);
-        return await this.userRepository.updateUser(user.id, updateUserDTO).then(() => {
-            return user;
-        });
+
+        await this.userRepository.updateUser(user.id, updateUserDTO);
+
+        return user;
     }
 
     public async updateUser(userId: string, updateUserDTO: UpdateUserDTO): Promise<User> {
@@ -36,35 +37,19 @@ export class UserService {
 
         if (updateUserDTO.email) {
             const confirmationToken = user.getRandomStringBytes();
-            const mail: ISendMailOptions = {
-                to: updateUserDTO.email,
-                from: process.env.COMPANY_EMAIL,
-                subject: 'Confirmation email',
-                template: 'confirmation-email',
-                context: {
-                    token: confirmationToken,
-                    url: process.env.SERVER_URL,
-                },
-            };
-            await this.mailerService.sendMail(mail).catch((error) => console.error('error', error));
+
+            await this.mailService.sendMailAboutMailIsChanged(user.email);
+
             updateUserDTO.confirmationToken = confirmationToken;
         }
 
         if (updateUserDTO.password && updateUserDTO.passwordConfirmation) {
             if (updateUserDTO.password === updateUserDTO.passwordConfirmation) {
                 const recoverToken = user.getRandomStringBytes();
-                const mail: ISendMailOptions = {
-                    to: updateUserDTO.email ? updateUserDTO.email : user.email,
-                    from: process.env.COMPANY_EMAIL,
-                    subject: 'Reset password',
-                    template: 'reset-password',
-                    context: {
-                        token: recoverToken,
-                        url: process.env.SERVER_URL,
-                    },
-                };
-                await this.mailerService.sendMail(mail).catch((error) => console.error('error', error));
                 const { password, salt } = await user.getPasswordAndSalt(updateUserDTO.password);
+
+                await this.mailService.sendMailAboutPasswordIsChanged(user.email);
+
                 updateUserDTO.recoverToken = recoverToken;
                 updateUserDTO.password = password;
                 updateUserDTO.salt = salt;
@@ -73,9 +58,9 @@ export class UserService {
             }
         }
 
-        return await this.userRepository.updateUser(user.id, updateUserDTO).then(() => {
-            return user;
-        });
+        await this.userRepository.updateUser(user.id, updateUserDTO);
+
+        return user;
     }
 
     public async deleteUser(userId: string) {

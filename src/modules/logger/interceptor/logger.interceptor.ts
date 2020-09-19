@@ -1,11 +1,10 @@
-import { Injectable, Inject, NestInterceptor, CallHandler, ExecutionContext } from '@nestjs/common';
-import { Logger } from 'winston';
+import { Injectable, Inject, NestInterceptor, CallHandler, ExecutionContext, LoggerService } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 
 @Injectable()
 export class LoggerInterceptor implements NestInterceptor {
-    constructor(@Inject(WINSTON_MODULE_PROVIDER) private logger: Logger) {}
+    constructor(@Inject(WINSTON_MODULE_PROVIDER) private logger: LoggerService) {}
 
     public intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
         this.log(context.switchToHttp().getRequest());
@@ -32,6 +31,6 @@ export class LoggerInterceptor implements NestInterceptor {
         };
         console.log(data);
 
-        this.logger.info(data);
+        this.logger.log(data);
     }
 }
