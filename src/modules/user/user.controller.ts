@@ -12,7 +12,7 @@ import { createUserSchema } from './schema/createUser.schema';
 import { changeUserRoleSchema } from './schema/changeUserRole.schema';
 import { updateUserSchema } from './schema/updateUser.schema';
 import { Role } from './../auth/decorators/role.decorator';
-import { GetUser } from './decorators/get-user.decorator';
+import { GetUser } from './decorators/getUser.decorator';
 import { RolesGuard } from './../auth/role.guard';
 import { UserRoleType } from './types/userRole.type';
 import { User } from './entity/user.entity';

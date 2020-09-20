@@ -2,6 +2,7 @@ import { Logger, UseGuards } from '@nestjs/common';
 import { SubscribeMessage, WebSocketGateway, OnGatewayInit, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect, MessageBody, WsResponse } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
 
+import { CreateTodoDTO } from './dto/createTodo.dto';
 import { TodoService } from './todo.service';
 
 @UseGuards()
@@ -16,6 +17,8 @@ export class TodoGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @SubscribeMessage('msgToServer')
     public handleMessage(client: Socket, payload: string): void {
+        console.log(client.handshake.query);
+
         this.server.emit('msgToClient', payload);
     }
 
@@ -24,16 +27,21 @@ export class TodoGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     public handleDisconnect(client: Socket) {
+        console.log(client.handshake.query);
+        
         this.logger.log(`Client disconnected: ${client.id}`);
     }
 
     public handleConnection(client: Socket) {
+        c
+        
+        
         this.logger.log(`Client connected: ${client.id}`);
     }
 
     @SubscribeMessage('createTodo')
-    public handleCreateTodo(@MessageBody() data: any): Promise<WsResponse<any>> {
-        return this.todoService.createTodo(data);
+    public handleCreateTodo(@MessageBody() createTodoDTO: CreateTodoDTO): Promise<WsResponse<any>> {
+        return this.todoService.createTodo(createTodoDTO);
     }
 
     @SubscribeMessage('updateTodo')

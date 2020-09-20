@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { WsException, WsResponse } from '@nestjs/websockets';
 
+import { CreateTodoDTO } from './dto/createTodo.dto';
 import { TodoRepository } from './repository/todo.repository';
 
 @Injectable()
@@ -11,14 +12,9 @@ export class TodoService {
         private readonly todoRepository: TodoRepository,
     ) {}
 
-    public async createTodo(data: any): Promise<WsResponse<any>> {
-        try {
-            const todo = this.todoRepository.createTodo(data);
-
-            return { event: 'createdTodo', data: todo };
-        } catch (err) {
-            throw new WsException(err.message);
-        }
+    public async createTodo(createTodoDTO: CreateTodoDTO): Promise<WsResponse<any>> {
+        const todo = await  this.todoRepository.createTodo(createTodoDTO);
+        return { event: 'createdTodo', data: todo };
     }
 
     public async updateTodo(data: any): Promise<WsResponse<any>> {
