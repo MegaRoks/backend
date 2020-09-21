@@ -1,46 +1,40 @@
-import { Logger, UseGuards } from '@nestjs/common';
-import { SubscribeMessage, WebSocketGateway, OnGatewayInit, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect, MessageBody, WsResponse } from '@nestjs/websockets';
+import { UseGuards } from '@nestjs/common';
+import {
+    SubscribeMessage,
+    WebSocketGateway,
+    WebSocketServer,
+    OnGatewayConnection,
+    OnGatewayDisconnect,
+    MessageBody,
+    WsResponse,
+    ConnectedSocket,
+} from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
 
+import { TokenGuard } from './../token/guards/token.guard';
 import { CreateTodoDTO } from './dto/createTodo.dto';
 import { TodoService } from './todo.service';
 
-@UseGuards()
+@UseGuards(TokenGuard)
 @WebSocketGateway()
-export class TodoGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+export class TodoGateway implements OnGatewayConnection, OnGatewayDisconnect {
     constructor(private readonly todoService: TodoService) {}
 
     @WebSocketServer()
     private server: Server;
 
-    private logger: Logger = new Logger('TodoGateway');
-
-    @SubscribeMessage('msgToServer')
-    public handleMessage(client: Socket, payload: string): void {
-        console.log(client.handshake.query);
-
-        this.server.emit('msgToClient', payload);
+    public handleDisconnect(@ConnectedSocket() client: Socket) {
+        // console.log('Disconnected', client.handshake.query.token);
     }
 
-    public afterInit() {
-        this.logger.log('Init');
-    }
-
-    public handleDisconnect(client: Socket) {
-        console.log(client.handshake.query);
-        
-        this.logger.log(`Client disconnected: ${client.id}`);
-    }
-
-    public handleConnection(client: Socket) {
-        c
-        
-        
-        this.logger.log(`Client connected: ${client.id}`);
+    public handleConnection(@ConnectedSocket() client: Socket) {
+        // console.log('Connected', client.handshake.query.token);
     }
 
     @SubscribeMessage('createTodo')
-    public handleCreateTodo(@MessageBody() createTodoDTO: CreateTodoDTO): Promise<WsResponse<any>> {
+    public handleCreateTodo(@ConnectedSocket() client: Socket, @MessageBody() createTodoDTO: CreateTodoDTO): Promise<WsResponse<any>> {
+        console.log('createTodo', client.handshake.query.token);
+
         return this.todoService.createTodo(createTodoDTO);
     }
 

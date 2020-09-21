@@ -29,8 +29,6 @@ export class LoggerInterceptor implements NestInterceptor {
             from: req.ip,
             madeBy: userEmail,
         };
-        console.log(data);
-
         this.logger.log(data);
     }
 }

@@ -7,8 +7,9 @@ import { UserModule } from './modules/user/user.module';
 import { TodoModule } from './modules/todo/todo.module';
 import { LoggerModule } from './modules/logger/logger.module';
 import { MailModule } from './modules/mail/mail.module';
+import { TokenModule } from './modules/token/token.module';
 
 @Module({
-    imports: [ConfigModule.forRoot(), DatabaseModule, AuthModule, UserModule, TodoModule, LoggerModule, MailModule],
+    imports: [ConfigModule.forRoot(), DatabaseModule, AuthModule, UserModule, TodoModule, LoggerModule, MailModule, TokenModule],
 })
 export class AppModule {}

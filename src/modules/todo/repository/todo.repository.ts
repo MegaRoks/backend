@@ -7,23 +7,19 @@ import { Todo } from './../entity/todo.entity';
 
 @EntityRepository(Todo)
 export class TodoRepository extends Repository<Todo> {
-    public async createTodo(createTodoDTO: CreateTodoDTO): Promise<Todo> {
+    public async createTodo(createTodoDTO: CreateTodoDTO): Promise<any> {
         // createTodoDTO.userId = 'b0211665-02a3-44f1-8a05-bfc01a6550cb';
-        console.log(createTodoDTO);
-        
-        const todo = this.create(createTodoDTO);
-        await this.createQueryBuilder()
-            .insert()
-            .into(Todo)
-            .values(todo)
-            .execute()
-            .catch(() => {
-                throw new WsException('Error while saving user to database');
-            });
-
-        console.log(todo);
-
-        return todo;
+    
+        // const todo = this.create(createTodoDTO);
+        // await this.createQueryBuilder()
+        //     .insert()
+        //     .into(Todo)
+        //     .values(todo)
+        //     .execute()
+        //     .catch(() => {
+        //         throw new WsException('Error while saving user to database');
+        //     });
+        return createTodoDTO;
     }
 
     public async updateTodo(data: any): Promise<any> {

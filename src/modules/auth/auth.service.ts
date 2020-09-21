@@ -1,5 +1,4 @@
 import { Injectable, NotFoundException, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { User } from './../user/entity/user.entity';
@@ -9,13 +8,14 @@ import { ChangePasswordDTO } from './dto/changePassword.dto';
 import { CreateUserDTO } from './../user/dto/createUser.dto';
 import { UpdateUserDTO } from './../user/dto/updateUser.dto';
 import { MailService } from './../mail/mail.service';
+import { TokenService } from '../token/token.service';
 
 @Injectable()
 export class AuthService {
     constructor(
         @InjectRepository(UserRepository)
         private userRepository: UserRepository,
-        private jwtService: JwtService,
+        private tokenService: TokenService,
         private mailService: MailService,
     ) {}
 
@@ -33,7 +33,7 @@ export class AuthService {
             delete user.password;
             delete user.salt;
             const jwtPayload = { user };
-            const token = this.jwtService.sign(jwtPayload);
+            const token = this.tokenService.signToken(jwtPayload);
 
             return { token };
         } else {
