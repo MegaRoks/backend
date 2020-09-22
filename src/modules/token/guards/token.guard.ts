@@ -11,6 +11,7 @@ import { IJwtPayload } from './../interfaces/jwtPayload.interface';
 export class TokenGuard implements CanActivate {
     constructor(
         @InjectRepository(UserRepository)
+        private readonly userRepository: UserRepository,
         private readonly tokenService: TokenService,
     ) {}
 
@@ -19,18 +20,11 @@ export class TokenGuard implements CanActivate {
             const client: Socket = context.switchToWs().getClient<Socket>();
             const token: string = client.handshake.query.token;
             const payload: IJwtPayload = this.tokenService.verifyToken(token);
+            const user = await this.userRepository.getUserById(payload.user.id);
 
-            if (payload) {
-                console.log(1);
-
-                return true;
-            } else {
-                console.log(2);
-
-                return false;
-            }
+            return Boolean(user);
         } catch (err) {
-            throw new WsException('Invalid credentials');
+            throw new WsException('Invalid token');
         }
     }
 }

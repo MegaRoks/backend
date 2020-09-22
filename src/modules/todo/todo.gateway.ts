@@ -33,7 +33,7 @@ export class TodoGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     @SubscribeMessage('createTodo')
     public handleCreateTodo(@ConnectedSocket() client: Socket, @MessageBody() createTodoDTO: CreateTodoDTO): Promise<WsResponse<any>> {
-        console.log('createTodo', client.handshake.query.token);
+        console.log('createTodo', createTodoDTO);
 
         return this.todoService.createTodo(createTodoDTO);
     }
