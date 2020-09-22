@@ -10,6 +10,9 @@ export class Todo {
     @Column({ type: 'varchar', nullable: false, length: 200 })
     public title: string;
 
+    @Column({ type: 'varchar', nullable: false })
+    public userId: string;
+
     @ManyToOne(() => User, (user: User) => user.todos)
     @JoinColumn({ name: 'userId' })
     public user: User;

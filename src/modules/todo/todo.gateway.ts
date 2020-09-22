@@ -2,16 +2,16 @@ import { UseGuards } from '@nestjs/common';
 import {
     SubscribeMessage,
     WebSocketGateway,
-    WebSocketServer,
     OnGatewayConnection,
     OnGatewayDisconnect,
     MessageBody,
     WsResponse,
     ConnectedSocket,
 } from '@nestjs/websockets';
-import { Socket, Server } from 'socket.io';
+import { Socket } from 'socket.io';
 
 import { TokenGuard } from './../token/guards/token.guard';
+import { GetTodoDTO } from './decorators/getTodoDTO.decorator';
 import { CreateTodoDTO } from './dto/createTodo.dto';
 import { TodoService } from './todo.service';
 
@@ -20,22 +20,17 @@ import { TodoService } from './todo.service';
 export class TodoGateway implements OnGatewayConnection, OnGatewayDisconnect {
     constructor(private readonly todoService: TodoService) {}
 
-    @WebSocketServer()
-    private server: Server;
-
     public handleDisconnect(@ConnectedSocket() client: Socket) {
-        // console.log('Disconnected', client.handshake.query.token);
+        console.log('Disconnected', client.id);
     }
 
     public handleConnection(@ConnectedSocket() client: Socket) {
-        // console.log('Connected', client.handshake.query.token);
+        console.log('Connected', client.id);
     }
 
     @SubscribeMessage('createTodo')
-    public handleCreateTodo(@ConnectedSocket() client: Socket, @MessageBody() createTodoDTO: CreateTodoDTO): Promise<WsResponse<any>> {
-        console.log('createTodo', createTodoDTO);
-
-        return this.todoService.createTodo(createTodoDTO);
+    public handleCreateTodo(@GetTodoDTO() createTodoDTO: CreateTodoDTO): Promise<WsResponse<any>> {
+        return this.todoService.createTodo({ title: createTodoDTO.title, userId: createTodoDTO.userId });
     }
 
     @SubscribeMessage('updateTodo')

@@ -8,7 +8,7 @@ import { ChangePasswordDTO } from './dto/changePassword.dto';
 import { CreateUserDTO } from './../user/dto/createUser.dto';
 import { UpdateUserDTO } from './../user/dto/updateUser.dto';
 import { MailService } from './../mail/mail.service';
-import { TokenService } from '../token/token.service';
+import { TokenService } from './../token/token.service';
 
 @Injectable()
 export class AuthService {

@@ -21,6 +21,8 @@ export class TokenGuard implements CanActivate {
             const token: string = client.handshake.query.token;
             const payload: IJwtPayload = this.tokenService.verifyToken(token);
             const user = await this.userRepository.getUserById(payload.user.id);
+            
+            (client as any).user = user;
 
             return Boolean(user);
         } catch (err) {
