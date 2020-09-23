@@ -8,34 +8,37 @@ import {
     UpdateDateColumn,
     DeleteDateColumn,
     BeforeInsert,
-    OneToMany,
+    OneToMany, 
+    JoinColumn,
 } from 'typeorm';
 import { hash, genSalt } from 'bcryptjs';
 import { randomBytes } from 'crypto';
 
 import { UserRoleType } from './../types/userRole.type';
 import { Todo } from './../../todo/entity/todo.entity';
+import { Category } from 'src/modules/category/entity/category.entity';
+import { Task } from 'src/modules/task/entity/task.entity';
 
 @Entity('users')
 @Unique(['email'])
 export class User extends BaseEntity {
     @PrimaryGeneratedColumn('uuid')
-    public id: string;
+    public readonly id: string;
 
     @Column({ nullable: false, type: 'varchar', length: 200 })
-    public email: string;
+    public readonly email: string;
 
     @Column({ nullable: false, type: 'varchar', length: 200 })
-    public firstName: string;
+    public readonly firstName: string;
 
     @Column({ nullable: false, type: 'varchar', length: 200 })
-    public lastName: string;
+    public readonly lastName: string;
 
     @Column({ type: 'enum', enum: UserRoleType, default: 'user' })
-    public role: string;
+    public readonly role: string;
 
     @Column({ nullable: false, type: 'boolean', default: false })
-    public isActive: boolean;
+    public readonly isActive: boolean;
 
     @Column({ nullable: false })
     public password: string;
@@ -50,16 +53,22 @@ export class User extends BaseEntity {
     public recoverToken: string;
 
     @OneToMany(() => Todo, (todo: Todo) => todo.user, { cascade: ['remove'] })
-    public todos: Todo[];
+    public readonly todos: Todo[];
+
+    @OneToMany(() => Category, (category: Category) => category.user, { cascade: ['remove'] })
+    public readonly categories: Category[];
+
+    @OneToMany(() => Task, (task: Task) => task.user, { cascade: ['remove'] })
+    public readonly tasks: Task[];
 
     @CreateDateColumn()
-    public createdAt: Date;
+    public readonly createdAt: Date;
 
     @UpdateDateColumn()
-    public updatedAt: Date;
+    public readonly updatedAt: Date;
 
     @DeleteDateColumn()
-    public deletedAt: Date;
+    public readonly deletedAt: Date;
 
     @BeforeInsert()
     private async setHashPasswordAndSalt(): Promise<void> {

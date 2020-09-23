@@ -12,32 +12,39 @@ import {
 
 import { User } from './../../user/entity/user.entity';
 import { Task } from './../../task/entity/task.entity';
+import { Category } from './../../category/entity/category.entity';
 
 @Entity('todos')
 export class Todo {
     @PrimaryGeneratedColumn('uuid')
-    public id: string;
+    public readonly id: string;
 
     @Column({ type: 'varchar', nullable: false, length: 200 })
-    public title: string;
-
-    @OneToMany(() => Task, (task: Task) => task.todo, { cascade: ['remove'] })
-    @JoinColumn({ name: 'todoId' })
-    public tasks: Task[];
+    public readonly title: string;
 
     @Column({ type: 'varchar', nullable: false })
-    public userId: string;
+    public readonly userId: string;
+
+    @Column({ type: 'varchar', nullable: false })
+    public readonly categoryId: string;
+
+    @OneToMany(() => Task, (task: Task) => task.todo)
+    public readonly tasks: Task[];
 
     @ManyToOne(() => User, (user: User) => user.todos)
     @JoinColumn({ name: 'userId' })
-    public user: User;
+    public readonly user: User;
+
+    @ManyToOne(() => Category, (category: Category) => category.todos)
+    @JoinColumn({ name: 'categoryId' })
+    public readonly category: Category;
 
     @CreateDateColumn()
-    public createdAt: Date;
+    public readonly createdAt: Date;
 
     @UpdateDateColumn()
-    public updatedAt: Date;
+    public readonly updatedAt: Date;
 
     @DeleteDateColumn()
-    public deletedAt: Date;
+    public readonly deletedAt: Date;
 }

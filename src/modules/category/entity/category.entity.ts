@@ -1,10 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, JoinColumn, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, ManyToOne } from 'typeorm';
 
 import { Todo } from './../../todo/entity/todo.entity';
 import { User } from './../../user/entity/user.entity';
 
-@Entity('tasks')
-export class Task {
+@Entity('categories')
+export class Category {
     @PrimaryGeneratedColumn('uuid')
     public readonly id: string;
 
@@ -12,19 +12,12 @@ export class Task {
     public readonly title: string;
 
     @Column({ type: 'varchar', nullable: false })
-    public readonly todoId: string;
-
-    @Column({ type: 'boolean', nullable: false, default: false })
-    public readonly status: boolean;
-
-    @Column({ type: 'varchar', nullable: false })
     public readonly userId: string;
 
-    @ManyToOne(() => Todo, (todo: Todo) => todo.tasks)
-    @JoinColumn({ name: 'todoId' })
-    public readonly todo: Todo;
+    @OneToMany(() => Todo, (todo: Todo) => todo.category)
+    public readonly todos: Todo[];
 
-    @ManyToOne(() => User, (user: User) => user.tasks)
+    @ManyToOne(() => User, (user: User) => user.categories)
     @JoinColumn({ name: 'userId' })
     public readonly user: User;
 

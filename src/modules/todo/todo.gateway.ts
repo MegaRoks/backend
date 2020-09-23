@@ -11,7 +11,7 @@ import {
 import { Socket } from 'socket.io';
 
 import { TokenGuard } from './../token/guards/token.guard';
-import { GetUserId } from './decorators/getUserId.decorator';
+import { GetUserId } from './../user/decorators/getUserId.decorator';
 import { CreateTodoDTO } from './dto/createTodo.dto';
 import { DeleteTodoDTO } from './dto/deleteTodo.dto';
 import { GetListTodosDTO } from './dto/getListTodos.dto';
