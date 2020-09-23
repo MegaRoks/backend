@@ -1,8 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { WsException, WsResponse } from '@nestjs/websockets';
+import { WsException } from '@nestjs/websockets';
 
 import { CreateTodoDTO } from './dto/createTodo.dto';
+import { DeleteTodoDTO } from './dto/deleteTodo.dto';
+import { GetListTodoOfUserDTO } from './dto/getListTodoOfUser.dto';
+import { UpdateTodoDTO } from './dto/updateTodo.dto';
+import { Todo } from './entity/todo.entity';
 import { TodoRepository } from './repository/todo.repository';
 
 @Injectable()
@@ -12,36 +16,35 @@ export class TodoService {
         private readonly todoRepository: TodoRepository,
     ) {}
 
-    public async createTodo(createTodoDTO: CreateTodoDTO): Promise<WsResponse<any>> {
-        const todo = await  this.todoRepository.createTodo(createTodoDTO);
-        return { event: 'createdTodo', data: todo };
+    public async createTodo(createTodoDTO: CreateTodoDTO): Promise<Todo> {
+        return await this.todoRepository.createTodo(createTodoDTO);
     }
 
-    public async updateTodo(data: any): Promise<WsResponse<any>> {
+    public async updateTodo(updateTodoDTO: UpdateTodoDTO): Promise<Todo> {
         try {
-            const todo = this.todoRepository.updateTodo(data);
+            const todo = await this.todoRepository.getTodoById(updateTodoDTO.id);
 
-            return { event: 'updatedTodo', data: todo };
+            await this.todoRepository.updateTodo(updateTodoDTO);
+
+            return todo;
         } catch (err) {
             throw new WsException(err.message);
         }
     }
 
-    public async deleteTodo(data: any): Promise<WsResponse<any>> {
+    public async deleteTodo(deleteTodoDTO: DeleteTodoDTO): Promise<void> {
         try {
-            const todo = this.todoRepository.deleteTodo(data);
+            const todo = await this.todoRepository.getTodoById(deleteTodoDTO.id);
 
-            return { event: 'updatedTodo', data: todo };
+            await this.todoRepository.deleteTodo(todo.id);
         } catch (err) {
             throw new WsException(err.message);
         }
     }
 
-    public async getListOfUserTodos(data: any): Promise<WsResponse<any>> {
+    public async getListOfUserTodos(getListTodoOfUserDTO: GetListTodoOfUserDTO): Promise<{ todos: Todo[], total: number }> {
         try {
-            const todo = this.todoRepository.getListOfUserTodos(data);
-
-            return { event: 'updatedTodo', data: todo };
+            return await this.todoRepository.getListOfUserTodos(getListTodoOfUserDTO);
         } catch (err) {
             throw new WsException(err.message);
         }

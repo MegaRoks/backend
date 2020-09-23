@@ -1,18 +1,14 @@
 import { UseGuards } from '@nestjs/common';
-import {
-    SubscribeMessage,
-    WebSocketGateway,
-    OnGatewayConnection,
-    OnGatewayDisconnect,
-    MessageBody,
-    WsResponse,
-    ConnectedSocket,
-} from '@nestjs/websockets';
+import { SubscribeMessage, WebSocketGateway, OnGatewayConnection, OnGatewayDisconnect, WsResponse, ConnectedSocket } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 
 import { TokenGuard } from './../token/guards/token.guard';
 import { GetTodoDTO } from './decorators/getTodoDTO.decorator';
 import { CreateTodoDTO } from './dto/createTodo.dto';
+import { DeleteTodoDTO } from './dto/deleteTodo.dto';
+import { GetListTodoOfUserDTO } from './dto/getListTodoOfUser.dto';
+import { UpdateTodoDTO } from './dto/updateTodo.dto';
+import { Todo } from './entity/todo.entity';
 import { TodoService } from './todo.service';
 
 @UseGuards(TokenGuard)
@@ -29,22 +25,29 @@ export class TodoGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     @SubscribeMessage('createTodo')
-    public handleCreateTodo(@GetTodoDTO() createTodoDTO: CreateTodoDTO): Promise<WsResponse<any>> {
-        return this.todoService.createTodo({ title: createTodoDTO.title, userId: createTodoDTO.userId });
+    public async handleCreateTodo(@GetTodoDTO() createTodoDTO: CreateTodoDTO): Promise<WsResponse<Todo>> {
+        const todo = await this.todoService.createTodo({ title: createTodoDTO.title, userId: createTodoDTO.userId });
+        return { event: 'createdTodo', data: todo };
     }
 
     @SubscribeMessage('updateTodo')
-    public handleUpdateTodo(@MessageBody() data: any): Promise<WsResponse<any>> {
-        return this.todoService.updateTodo(data);
+    public async handleUpdateTodo(@GetTodoDTO() updateTodoDTO: UpdateTodoDTO): Promise<WsResponse<Todo>> {
+        const todo = await this.todoService.updateTodo(updateTodoDTO);
+
+        return { event: 'updatedTodo', data: todo };
     }
 
     @SubscribeMessage('deleteTodo')
-    public handleDeleteTodo(@MessageBody() data: any): Promise<WsResponse<number>> {
-        return this.todoService.deleteTodo(data);
+    public async handleDeleteTodo(@GetTodoDTO() deleteTodoDTO: DeleteTodoDTO): Promise<WsResponse<{ message: string }>> {
+        await this.todoService.deleteTodo(deleteTodoDTO);
+
+        return { event: 'updatedTodo', data: { message: 'Todo deleted successfully' } };
     }
 
     @SubscribeMessage('getListTodo')
-    public handleListTodo(@MessageBody() data: any): Promise<WsResponse<any>> {
-        return this.todoService.getListOfUserTodos(data);
+    public async handleListTodo(@GetTodoDTO() getListTodoOfUserDTO: GetListTodoOfUserDTO): Promise<WsResponse<{ todos: Todo[]; total: number }>> {
+        const todos = await this.todoService.getListOfUserTodos(getListTodoOfUserDTO);
+
+        return { event: 'updatedTodo', data: todos };
     }
 }
