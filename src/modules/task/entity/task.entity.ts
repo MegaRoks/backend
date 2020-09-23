@@ -5,24 +5,27 @@ import { Todo } from './../../todo/entity/todo.entity';
 @Entity('tasks')
 export class Task {
     @PrimaryGeneratedColumn('uuid')
-    public id: string;
+    public readonly id: string;
 
     @Column({ type: 'varchar', nullable: false, length: 200 })
-    public title: string;
+    public readonly title: string;
 
     @Column({ type: 'varchar', nullable: false })
-    public todoId: string;
+    public readonly todoId: string;
 
     @ManyToOne(() => Todo, (todo: Todo) => todo.tasks)
     @JoinColumn({ name: 'todoId' })
-    public todo: Todo;
+    public readonly todo: Todo;
+
+    @Column({ type: 'boolean', nullable: false, default: false })
+    public readonly status: boolean;
 
     @CreateDateColumn()
-    public createdAt: Date;
+    public readonly createdAt: Date;
 
     @UpdateDateColumn()
-    public updatedAt: Date;
+    public readonly updatedAt: Date;
 
     @DeleteDateColumn()
-    public deletedAt: Date;
+    public readonly deletedAt: Date;
 }

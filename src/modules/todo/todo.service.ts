@@ -4,7 +4,7 @@ import { WsException } from '@nestjs/websockets';
 
 import { CreateTodoDTO } from './dto/createTodo.dto';
 import { DeleteTodoDTO } from './dto/deleteTodo.dto';
-import { GetListTodoOfUserDTO } from './dto/getListTodoOfUser.dto';
+import { GetListTodosDTO } from './dto/getListTodos.dto';
 import { UpdateTodoDTO } from './dto/updateTodo.dto';
 import { Todo } from './entity/todo.entity';
 import { TodoRepository } from './repository/todo.repository';
@@ -40,9 +40,9 @@ export class TodoService {
         }
     }
 
-    public async getListOfUserTodos(getListTodoOfUserDTO: GetListTodoOfUserDTO): Promise<{ todos: Todo[]; total: number }> {
+    public async getListOfUserTodos(getListTodosDTO: GetListTodosDTO): Promise<{ todos: Todo[]; total: number }> {
         try {
-            return await this.todoRepository.getListOfUserTodos(getListTodoOfUserDTO);
+            return await this.todoRepository.getListOfUserTodos(getListTodosDTO);
         } catch (err) {
             throw new WsException(err.message);
         }

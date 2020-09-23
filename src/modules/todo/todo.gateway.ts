@@ -14,7 +14,7 @@ import { TokenGuard } from './../token/guards/token.guard';
 import { GetUserId } from './decorators/getUserId.decorator';
 import { CreateTodoDTO } from './dto/createTodo.dto';
 import { DeleteTodoDTO } from './dto/deleteTodo.dto';
-import { GetListTodoOfUserDTO } from './dto/getListTodoOfUser.dto';
+import { GetListTodosDTO } from './dto/getListTodos.dto';
 import { UpdateTodoDTO } from './dto/updateTodo.dto';
 import { Todo } from './entity/todo.entity';
 import { TodoService } from './todo.service';
@@ -47,16 +47,21 @@ export class TodoGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     @SubscribeMessage('deleteTodo')
-    public async handleDeleteTodo(@GetUserId() userId: string, @MessageBody() deleteTodoDTO: DeleteTodoDTO): Promise<WsResponse<{ message: string }>> {
+    public async handleDeleteTodo(
+        @GetUserId() userId: string,
+        @MessageBody() deleteTodoDTO: DeleteTodoDTO,
+    ): Promise<WsResponse<{ message: string }>> {
         await this.todoService.deleteTodo(userId, deleteTodoDTO);
 
         return { event: 'deletedTodo', data: { message: 'Todo deleted successfully' } };
     }
 
     @SubscribeMessage('getListOfUserTodos')
-    public async handleGetListOfUSerTodos(@MessageBody() getListTodoOfUserDTO: GetListTodoOfUserDTO): Promise<WsResponse<{ todos: Todo[]; total: number }>> {
-        const todos = await this.todoService.getListOfUserTodos(getListTodoOfUserDTO);
+    public async handleGetListOfUSerTodos(@MessageBody() getListTodosDTO: GetListTodosDTO): Promise<WsResponse<{ todos: Todo[]; total: number }>> {
+        console.log('getListTodosDTO', getListTodosDTO);
 
-        return { event: 'gotListOfUSerTodos', data: todos };
+        const todos = await this.todoService.getListOfUserTodos(getListTodosDTO);
+
+        return { event: 'gotListOfUserTodos', data: todos };
     }
 }

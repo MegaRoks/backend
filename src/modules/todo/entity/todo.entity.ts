@@ -22,6 +22,7 @@ export class Todo {
     public title: string;
 
     @OneToMany(() => Task, (task: Task) => task.todo, { cascade: ['remove'] })
+    @JoinColumn({ name: 'todoId' })
     public tasks: Task[];
 
     @Column({ type: 'varchar', nullable: false })

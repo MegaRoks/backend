@@ -1,6 +1,11 @@
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WsResponse } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 
+import { CreateTaskDTO } from './dto/createTask.dto';
+import { DeleteTaskDTO } from './dto/deleteTask.dto';
+import { GetListTasksDTO } from './dto/getListTask.dto';
+import { UpdateTaskDTO } from './dto/updateTask.dto';
+import { Task } from './entity/task.entity';
 import { TaskService } from './task.service';
 
 @WebSocketGateway()
@@ -16,29 +21,29 @@ export class TaskGateway {
     }
 
     @SubscribeMessage('createTask')
-    public async handleCreateTask(@MessageBody() createTaskDTO: any): Promise<WsResponse<any>> {
+    public async handleCreateTask(@MessageBody() createTaskDTO: CreateTaskDTO): Promise<WsResponse<Task>> {
         const task = await this.taskService.createTask(createTaskDTO);
 
         return { event: 'createdTask', data: task };
     }
 
     @SubscribeMessage('updateTask')
-    public async handleUpdateTask(@MessageBody() updateTaskDTO: any): Promise<WsResponse<any>> {
+    public async handleUpdateTask(@MessageBody() updateTaskDTO: UpdateTaskDTO): Promise<WsResponse<Task>> {
         const task = await this.taskService.updateTask(updateTaskDTO);
 
         return { event: 'updatedTask', data: task };
     }
 
     @SubscribeMessage('deleteTask')
-    public async handleDeleteTask(@MessageBody() deleteTaskDTO: any): Promise<WsResponse<{ message: string }>> {
+    public async handleDeleteTask(@MessageBody() deleteTaskDTO: DeleteTaskDTO): Promise<WsResponse<{ message: string }>> {
         await this.taskService.deleteTask(deleteTaskDTO);
 
         return { event: 'deletedTask', data: { message: 'Task deleted successfully' } };
     }
 
     @SubscribeMessage('getListOfTaskTasks')
-    public async handleGetListOfTaskTasks(@MessageBody() getListOfTaskTasksDTO: any): Promise<WsResponse<{ tasks: any[]; total: number }>> {
-        const tasks = await this.taskService.getListOfTaskTasks(getListOfTaskTasksDTO);
+    public async handleGetListOfTaskTasks(@MessageBody() getListTasksDTO: GetListTasksDTO): Promise<WsResponse<{ tasks: Task[]; total: number }>> {
+        const tasks = await this.taskService.getListOfTaskTasks(getListTasksDTO);
 
         return { event: 'gotListOfTaskTasks', data: tasks };
     }
