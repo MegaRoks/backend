@@ -20,4 +20,8 @@ export class UpdateTaskDTO {
     @IsNotEmpty({ message: 'Enter an id of todo' })
     @IsString({ message: 'Please enter an id of todo' })
     public readonly todoId: string;
+
+    @IsNotEmpty({ message: 'Enter an id of user' })
+    @IsString({ message: 'Please enter an id of user' })
+    public readonly userId: string;
 }

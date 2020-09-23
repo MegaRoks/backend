@@ -25,7 +25,7 @@ export class Todo {
     @Column({ type: 'varchar', nullable: false })
     public readonly userId: string;
 
-    @Column({ type: 'varchar', nullable: false })
+    @Column({ type: 'varchar', nullable: true })
     public readonly categoryId: string;
 
     @OneToMany(() => Task, (task: Task) => task.todo)

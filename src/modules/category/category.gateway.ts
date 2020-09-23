@@ -1,14 +1,17 @@
+import { UseGuards } from '@nestjs/common';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WsResponse } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
-import { GetUserId } from './../user/decorators/getUserId.decorator';
 
+import { TokenGuard } from './../token/guards/token.guard';
+import { MessageData } from './../shared/decorators/messageData.decorator';
 import { CategoryService } from './category.service';
 import { CreateCategoryDTO } from './dto/createCategory.dto';
 import { DeleteCategoryDTO } from './dto/deleteCategory.dto';
-import { GetListCategoriesDTO } from './dto/getListCategory.dto';
+import { GetCategoriesListDTO } from './dto/getCategoriesList.dto';
 import { UpdateCategoryDTO } from './dto/updateCategory.dto';
 import { Category } from './entity/category.entity';
 
+@UseGuards(TokenGuard)
 @WebSocketGateway()
 export class CategoryGateway {
     constructor(private readonly categoryService: CategoryService) {}
@@ -22,41 +25,32 @@ export class CategoryGateway {
     }
 
     @SubscribeMessage('createCategory')
-    public async handleCreateCategory(
-        @GetUserId() userId: string,
-        @MessageBody() createCategoryDTO: CreateCategoryDTO,
-    ): Promise<WsResponse<Category>> {
-        const category = await this.categoryService.createCategory(userId, createCategoryDTO);
+    public async handleCreateCategory(@MessageData() createCategoryDTO: CreateCategoryDTO): Promise<WsResponse<Category>> {
+        const category = await this.categoryService.createCategory(createCategoryDTO);
 
         return { event: 'createdCategory', data: category };
     }
 
     @SubscribeMessage('updateCategory')
-    public async handleUpdateCategory(
-        @GetUserId() userId: string,
-        @MessageBody() updateCategoryDTO: UpdateCategoryDTO,
-    ): Promise<WsResponse<Category>> {
-        const category = await this.categoryService.updateCategory(userId, updateCategoryDTO);
+    public async handleUpdateCategory(@MessageData() updateCategoryDTO: UpdateCategoryDTO): Promise<WsResponse<Category>> {
+        const category = await this.categoryService.updateCategory(updateCategoryDTO);
 
         return { event: 'updatedCategory', data: category };
     }
 
     @SubscribeMessage('deleteCategory')
-    public async handleDeleteCategory(
-        @GetUserId() userId: string,
-        @MessageBody() deleteCategoryDTO: DeleteCategoryDTO,
-    ): Promise<WsResponse<{ message: string }>> {
-        await this.categoryService.deleteCategory(userId, deleteCategoryDTO);
+    public async handleDeleteCategory(@MessageData() deleteCategoryDTO: DeleteCategoryDTO): Promise<WsResponse<{ message: string }>> {
+        await this.categoryService.deleteCategory(deleteCategoryDTO);
 
         return { event: 'deletedCategory', data: { message: 'Category deleted successfully' } };
     }
 
-    @SubscribeMessage('getListOfTodosCategories')
-    public async handleGetListOfTodosCategories(
-        @MessageBody() getListOfCategoriesDTO: GetListCategoriesDTO,
+    @SubscribeMessage('getCategoriesList')
+    public async handleGetListCategories(
+        @MessageData() getListCategoriesDTO: GetCategoriesListDTO,
     ): Promise<WsResponse<{ categories: any[]; total: number }>> {
-        const categories = await this.categoryService.getListOfTodosCategories(getListOfCategoriesDTO);
+        const categories = await this.categoryService.getCategoriesList(getListCategoriesDTO);
 
-        return { event: 'gotListOfTodosCategories', data: categories };
+        return { event: 'gotCategoriesList', data: categories };
     }
 }

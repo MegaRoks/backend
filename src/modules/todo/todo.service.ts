@@ -4,7 +4,7 @@ import { WsException } from '@nestjs/websockets';
 
 import { CreateTodoDTO } from './dto/createTodo.dto';
 import { DeleteTodoDTO } from './dto/deleteTodo.dto';
-import { GetListTodosDTO } from './dto/getListTodos.dto';
+import { GetTodosListDTO } from './dto/getTodosList.dto';
 import { UpdateTodoDTO } from './dto/updateTodo.dto';
 import { Todo } from './entity/todo.entity';
 import { TodoRepository } from './repository/todo.repository';
@@ -16,33 +16,41 @@ export class TodoService {
         private readonly todoRepository: TodoRepository,
     ) {}
 
-    public async createTodo(userId: string, createTodoDTO: CreateTodoDTO): Promise<Todo> {
-        return await this.todoRepository.createTodo(userId, createTodoDTO);
+    public async createTodo(createTodoDTO: CreateTodoDTO): Promise<Todo> {
+        return await this.todoRepository.createTodo(createTodoDTO);
     }
 
-    public async updateTodo(userId: string, updateTodoDTO: UpdateTodoDTO): Promise<Todo> {
+    public async updateTodo(updateTodoDTO: UpdateTodoDTO): Promise<Todo> {
         try {
-            const todo = await this.todoRepository.getTodoByTodoIdAndUserId(userId, updateTodoDTO.id);
+            const todo = await this.todoRepository.getTodo(updateTodoDTO.id, updateTodoDTO.userId);
 
-            return await this.todoRepository.updateTodo(todo.userId, updateTodoDTO);
+            if (!todo) {
+                throw new WsException('Todo not found');
+            }
+
+            return await this.todoRepository.updateTodo(updateTodoDTO);
         } catch (err) {
             throw new WsException(err.message);
         }
     }
 
-    public async deleteTodo(userId: string, deleteTodoDTO: DeleteTodoDTO): Promise<void> {
+    public async deleteTodo(deleteTodoDTO: DeleteTodoDTO): Promise<void> {
         try {
-            const todo = await this.todoRepository.getTodoByTodoIdAndUserId(userId, deleteTodoDTO.id);
+            const todo = await this.todoRepository.getTodo(deleteTodoDTO.id, deleteTodoDTO.userId);
 
-            await this.todoRepository.deleteTodo(userId, todo.id);
+            if (!todo) {
+                throw new WsException('Todo not found');
+            }
+
+            await this.todoRepository.deleteTodo(deleteTodoDTO);
         } catch (err) {
             throw new WsException(err.message);
         }
     }
 
-    public async getListOfUserTodos(getListTodosDTO: GetListTodosDTO): Promise<{ todos: Todo[]; total: number }> {
+    public async getTodosList(getListTodosDTO: GetTodosListDTO): Promise<{ todos: Todo[]; total: number }> {
         try {
-            return await this.todoRepository.getListOfUserTodos(getListTodosDTO);
+            return await this.todoRepository.getTodosList(getListTodosDTO);
         } catch (err) {
             throw new WsException(err.message);
         }

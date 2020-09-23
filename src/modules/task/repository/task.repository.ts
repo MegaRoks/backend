@@ -1,8 +1,9 @@
 import { WsException } from '@nestjs/websockets';
 import { EntityRepository, Repository } from 'typeorm';
 
+import { DeleteTaskDTO } from './../dto/deleteTask.dto';
 import { CreateTaskDTO } from './../dto/createTask.dto';
-import { GetListTasksDTO } from './../dto/getListTask.dto';
+import { GetTasksListDTO } from './../dto/getTasksList.dto';
 import { UpdateTaskDTO } from './../dto/updateTask.dto';
 import { Task } from './../entity/task.entity';
 
@@ -23,13 +24,14 @@ export class TaskRepository extends Repository<Task> {
         return task;
     }
 
-    public async updateTask(todoId: string, updateTaskDTO: UpdateTaskDTO): Promise<any> {
+    public async updateTask(updateTaskDTO: UpdateTaskDTO): Promise<any> {
         const task = this.create(updateTaskDTO);
         await this.createQueryBuilder()
             .update(Task)
             .set(task)
             .where('id = :taskId', { taskId: task.id })
-            .andWhere('todoId = :todoId', { todoId })
+            .andWhere('todoId = :todoId', { todoIdd: task.todoId })
+            .andWhere('userId = :userId', { userIdd: task.userId })
             .execute()
             .then((task) => task)
             .catch(() => {
@@ -39,44 +41,42 @@ export class TaskRepository extends Repository<Task> {
         return task;
     }
 
-    public async deleteTask(taskId: string, todoId: string): Promise<void> {
+    public async deleteTask(deleteTaskDTO: DeleteTaskDTO): Promise<void> {
+        const task = this.create(deleteTaskDTO);
         await this.createQueryBuilder()
             .delete()
             .from(Task)
-            .where('id = :taskId', { taskId })
-            .andWhere('todoId = :todoId', { todoId })
+            .where('id = :taskId', { taskId: task.id })
+            .andWhere('todoId = :todoId', { todoId: task.todoId })
+            .andWhere('userId = :userId', { userId: task.userId })
             .execute()
             .catch(() => {
                 throw new WsException('Error while saving user to database');
             });
     }
 
-    public async getTaskByTaskIdAndTotoId(taskId: string, todoId: string): Promise<Task> {
-        const task = await this.createQueryBuilder()
+    public async getTaskBy(taskId: string, todoId: string, userId: string): Promise<Task | undefined> {
+        return await this.createQueryBuilder()
             .select(['t.id', 't.title', 't.todoId'])
             .from(Task, 't')
             .where('t.id = :taskId', { taskId })
             .andWhere('t.todoId = :todoId', { todoId })
+            .andWhere('t.userId = :userId', { userId })
             .getOne()
             .then((todo) => todo)
             .catch(() => {
                 throw new WsException('Error while saving user to database');
             });
-
-        if (!task) {
-            throw new WsException('Todo not found');
-        }
-
-        return task;
     }
 
-    public async getListOfTaskTasks(getListTasksDTO: GetListTasksDTO): Promise<{ tasks: any[]; total: number }> {
-        const { todoId, sort, page, limit } = getListTasksDTO;
+    public async getTasksList(getListTasksDTO: GetTasksListDTO): Promise<{ tasks: any[]; total: number }> {
+        const { userId, todoId, sort, page, limit } = getListTasksDTO;
         const query = this.createQueryBuilder();
 
         query.select(['t.id', 't.title', 't.todoId', 't.status']);
         query.from(Task, 't');
         query.where('t.todoId = :todoId', { todoId });
+        query.andWhere('t.userId = :userId', { userId });
 
         page > 0 && limit > 0 && query.skip((page - 1) * limit);
         page > 0 && limit < 0 && query.skip((page - 1) * 100);

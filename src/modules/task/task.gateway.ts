@@ -1,13 +1,17 @@
-import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WsResponse } from '@nestjs/websockets';
+import { UseGuards } from '@nestjs/common';
+import { ConnectedSocket, SubscribeMessage, WebSocketGateway, WsResponse } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 
+import { TokenGuard } from './../token/guards/token.guard';
+import { MessageData } from './../shared/decorators/messageData.decorator';
 import { CreateTaskDTO } from './dto/createTask.dto';
 import { DeleteTaskDTO } from './dto/deleteTask.dto';
-import { GetListTasksDTO } from './dto/getListTask.dto';
+import { GetTasksListDTO } from './dto/getTasksList.dto';
 import { UpdateTaskDTO } from './dto/updateTask.dto';
 import { Task } from './entity/task.entity';
 import { TaskService } from './task.service';
 
+@UseGuards(TokenGuard)
 @WebSocketGateway()
 export class TaskGateway {
     constructor(private readonly taskService: TaskService) {}
@@ -21,30 +25,30 @@ export class TaskGateway {
     }
 
     @SubscribeMessage('createTask')
-    public async handleCreateTask(@MessageBody() createTaskDTO: CreateTaskDTO): Promise<WsResponse<Task>> {
+    public async handleCreateTask(@MessageData() createTaskDTO: CreateTaskDTO): Promise<WsResponse<Task>> {
         const task = await this.taskService.createTask(createTaskDTO);
 
         return { event: 'createdTask', data: task };
     }
 
     @SubscribeMessage('updateTask')
-    public async handleUpdateTask(@MessageBody() updateTaskDTO: UpdateTaskDTO): Promise<WsResponse<Task>> {
+    public async handleUpdateTask(@MessageData() updateTaskDTO: UpdateTaskDTO): Promise<WsResponse<Task>> {
         const task = await this.taskService.updateTask(updateTaskDTO);
 
         return { event: 'updatedTask', data: task };
     }
 
     @SubscribeMessage('deleteTask')
-    public async handleDeleteTask(@MessageBody() deleteTaskDTO: DeleteTaskDTO): Promise<WsResponse<{ message: string }>> {
+    public async handleDeleteTask(@MessageData() deleteTaskDTO: DeleteTaskDTO): Promise<WsResponse<{ message: string }>> {
         await this.taskService.deleteTask(deleteTaskDTO);
 
         return { event: 'deletedTask', data: { message: 'Task deleted successfully' } };
     }
 
-    @SubscribeMessage('getListOfTaskTasks')
-    public async handleGetListOfTaskTasks(@MessageBody() getListTasksDTO: GetListTasksDTO): Promise<WsResponse<{ tasks: Task[]; total: number }>> {
-        const tasks = await this.taskService.getListOfTaskTasks(getListTasksDTO);
+    @SubscribeMessage('getTasksList')
+    public async handleGetTasksList(@MessageData() getListTasksDTO: GetTasksListDTO): Promise<WsResponse<{ tasks: Task[]; total: number }>> {
+        const tasks = await this.taskService.getTasksList(getListTasksDTO);
 
-        return { event: 'gotListOfTaskTasks', data: tasks };
+        return { event: 'gotTasksList', data: tasks };
     }
 }

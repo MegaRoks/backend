@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { WsException } from '@nestjs/websockets';
 import { CreateTaskDTO } from './dto/createTask.dto';
 import { DeleteTaskDTO } from './dto/deleteTask.dto';
-import { GetListTasksDTO } from './dto/getListTask.dto';
+import { GetTasksListDTO } from './dto/getTasksList.dto';
 import { UpdateTaskDTO } from './dto/updateTask.dto';
 import { Task } from './entity/task.entity';
 
@@ -22,9 +22,13 @@ export class TaskService {
 
     public async updateTask(updateTaskDTO: UpdateTaskDTO): Promise<Task> {
         try {
-            const task = await this.taskRepository.getTaskByTaskIdAndTotoId(updateTaskDTO.id, updateTaskDTO.todoId);
+            const task = await this.taskRepository.getTaskBy(updateTaskDTO.id, updateTaskDTO.todoId, updateTaskDTO.userId);
 
-            return await this.taskRepository.updateTask(task.todoId, updateTaskDTO);
+            if (!task) {
+                throw new WsException('Todo not found');
+            }
+
+            return await this.taskRepository.updateTask(updateTaskDTO);
         } catch (err) {
             throw new WsException(err.message);
         }
@@ -32,17 +36,21 @@ export class TaskService {
 
     public async deleteTask(deleteTaskDTO: DeleteTaskDTO): Promise<void> {
         try {
-            const task = await this.taskRepository.getTaskByTaskIdAndTotoId(deleteTaskDTO.id, deleteTaskDTO.todoId);
+            const task = await this.taskRepository.getTaskBy(deleteTaskDTO.id, deleteTaskDTO.todoId, deleteTaskDTO.userId);
 
-            await this.taskRepository.deleteTask(task.id, task.todoId);
+            if (!task) {
+                throw new WsException('Todo not found');
+            }
+
+            await this.taskRepository.deleteTask(deleteTaskDTO);
         } catch (err) {
             throw new WsException(err.message);
         }
     }
 
-    public async getListOfTaskTasks(getListTaskOfUserDTO: GetListTasksDTO): Promise<{ tasks: Task[]; total: number }> {
+    public async getTasksList(getListTaskOfUserDTO: GetTasksListDTO): Promise<{ tasks: Task[]; total: number }> {
         try {
-            return await this.taskRepository.getListOfTaskTasks(getListTaskOfUserDTO);
+            return await this.taskRepository.getTasksList(getListTaskOfUserDTO);
         } catch (err) {
             throw new WsException(err.message);
         }

@@ -1,14 +1,15 @@
 import { WsException } from '@nestjs/websockets';
 import { EntityRepository, Repository } from 'typeorm';
+import { DeleteCategoryDTO } from './../dto/deleteCategory.dto';
 import { CreateCategoryDTO } from './../dto/createCategory.dto';
-import { GetListCategoriesDTO } from './../dto/getListCategory.dto';
+import { GetCategoriesListDTO } from './../dto/getCategoriesList.dto';
 import { UpdateCategoryDTO } from './../dto/updateCategory.dto';
 import { Category } from './../entity/category.entity';
 
 @EntityRepository(Category)
 export class CategoryRepository extends Repository<Category> {
-    public async createCategory(userId: string, createCategoryDTO: CreateCategoryDTO): Promise<Category> {
-        const category = this.create({ userId, ...createCategoryDTO });
+    public async createCategory(createCategoryDTO: CreateCategoryDTO): Promise<Category> {
+        const category = this.create(createCategoryDTO);
         await this.createQueryBuilder()
             .insert()
             .into(Category)
@@ -22,13 +23,13 @@ export class CategoryRepository extends Repository<Category> {
         return category;
     }
 
-    public async updateCategory(userId: string, updateCategoryDTO: UpdateCategoryDTO): Promise<Category> {
+    public async updateCategory(updateCategoryDTO: UpdateCategoryDTO): Promise<Category> {
         const category = this.create(updateCategoryDTO);
         await this.createQueryBuilder()
             .update(Category)
             .set(category)
             .where('id = :categoryId', { categoryId: category.id })
-            .andWhere('userId = :userId', { userId })
+            .andWhere('userId = :userId', { userId: category.userId })
             .execute()
             .then((category) => category)
             .catch(() => {
@@ -38,20 +39,21 @@ export class CategoryRepository extends Repository<Category> {
         return category;
     }
 
-    public async deleteCategory(userId: string, categoryId: string): Promise<void> {
+    public async deleteCategory(deleteCategoryDTO: DeleteCategoryDTO): Promise<void> {
+        const category = this.create(deleteCategoryDTO);
         await this.createQueryBuilder()
             .delete()
             .from(Category)
-            .where('id = :categoryId', { categoryId })
-            .andWhere('userId = :userId', { userId })
+            .where('id = :categoryId', { categoryId: category.id })
+            .andWhere('userId = :userId', { userId: category.userId })
             .execute()
             .catch(() => {
                 throw new WsException('Error while saving user to database');
             });
     }
 
-    public async getCategoryByCategoryIdAndUserId(categoryId: string, userId: string): Promise<Category> {
-        const category = await this.createQueryBuilder()
+    public async getCategory(categoryId: string, userId: string): Promise<Category | undefined> {
+        return await this.createQueryBuilder()
             .select(['t'])
             .from(Category, 't')
             .leftJoinAndSelect('c.tasks', 'task')
@@ -63,22 +65,16 @@ export class CategoryRepository extends Repository<Category> {
             .catch(() => {
                 throw new WsException('Error while saving user to database');
             });
-
-        if (!category) {
-            throw new WsException('Todo not found');
-        }
-
-        return category;
     }
 
-    public async getListOfTodosCategories(getListCategoryOfUserDTO: GetListCategoriesDTO): Promise<{ categories: Category[]; total: number }> {
+    public async getCategoriesList(getListCategoryOfUserDTO: GetCategoriesListDTO): Promise<{ categories: Category[]; total: number }> {
+        console.log('a', getListCategoryOfUserDTO);
+        
         const { userId, sort, page, limit } = getListCategoryOfUserDTO;
         const query = this.createQueryBuilder();
 
-        query.select(['t']);
-        query.from(Category, 't');
-        query.leftJoinAndSelect('c.tasks', 'task');
-        query.leftJoinAndSelect('c.todos', 'todo');
+        query.select(['c']);
+        query.from(Category, 'c');
         query.where('c.userId = :userId', { userId });
 
         page > 0 && limit > 0 && query.skip((page - 1) * limit);
@@ -97,6 +93,8 @@ export class CategoryRepository extends Repository<Category> {
                 throw new WsException('Error while saving user to database');
             });
 
+        console.log(categories, total);
+        
         return { categories, total };
     }
 }

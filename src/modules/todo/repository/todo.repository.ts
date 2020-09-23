@@ -1,15 +1,16 @@
 import { WsException } from '@nestjs/websockets';
 import { EntityRepository, Repository } from 'typeorm';
 
-import { GetListTodosDTO } from './../dto/getListTodos.dto';
+import { GetTodosListDTO } from './../dto/getTodosList.dto';
 import { UpdateTodoDTO } from './../dto/updateTodo.dto';
 import { CreateTodoDTO } from './../dto/createTodo.dto';
+import { DeleteTodoDTO } from './../dto/deleteTodo.dto';
 import { Todo } from './../entity/todo.entity';
 
 @EntityRepository(Todo)
 export class TodoRepository extends Repository<Todo> {
-    public async createTodo(userId: string, createTodoDTO: CreateTodoDTO): Promise<Todo> {
-        const todo = this.create({ userId, ...createTodoDTO });
+    public async createTodo(createTodoDTO: CreateTodoDTO): Promise<Todo> {
+        const todo = this.create(createTodoDTO);
         await this.createQueryBuilder()
             .insert()
             .into(Todo)
@@ -23,13 +24,13 @@ export class TodoRepository extends Repository<Todo> {
         return todo;
     }
 
-    public async updateTodo(userId: string, updateTodoDTO: UpdateTodoDTO): Promise<Todo> {
+    public async updateTodo(updateTodoDTO: UpdateTodoDTO): Promise<Todo> {
         const todo = this.create(updateTodoDTO);
         await this.createQueryBuilder()
             .update(Todo)
             .set(todo)
             .where('id = :todoId', { todoId: todo.id })
-            .andWhere('userId = :userId', { userId })
+            .andWhere('userId = :userId', { userId: todo.userId })
             .execute()
             .then((todo) => todo)
             .catch(() => {
@@ -39,19 +40,20 @@ export class TodoRepository extends Repository<Todo> {
         return todo;
     }
 
-    public async deleteTodo(userId: string, todoId: string): Promise<void> {
+    public async deleteTodo(deleteTodoDTO: DeleteTodoDTO): Promise<void> {
+        const todo = this.create(deleteTodoDTO);
         await this.createQueryBuilder()
             .delete()
             .from(Todo)
-            .where('id = :todoId', { todoId })
-            .andWhere('userId = :userId', { userId })
+            .where('id = :todoId', { todoId: todo.id })
+            .andWhere('userId = :userId', { userId: todo.userId })
             .execute()
             .catch(() => {
                 throw new WsException('Error while saving user to database');
             });
     }
 
-    public async getListOfUserTodos(getListTodosDTO: GetListTodosDTO): Promise<{ todos: Todo[]; total: number }> {
+    public async getTodosList(getListTodosDTO: GetTodosListDTO): Promise<{ todos: Todo[]; total: number }> {
         const { userId, sort, page, limit } = getListTodosDTO;
         const query = this.createQueryBuilder();
 
@@ -79,8 +81,8 @@ export class TodoRepository extends Repository<Todo> {
         return { todos, total };
     }
 
-    public async getTodoByTodoIdAndUserId(userId: string, todoId: string): Promise<Todo> {
-        const todo = await this.createQueryBuilder()
+    public async getTodo(todoId: string, userId: string): Promise<Todo | undefined> {
+        return await this.createQueryBuilder()
             .select(['t'])
             .from(Todo, 't')
             .leftJoinAndSelect('t.tasks', 'task')
@@ -91,11 +93,5 @@ export class TodoRepository extends Repository<Todo> {
             .catch(() => {
                 throw new WsException('Error while saving user to database');
             });
-
-        if (!todo) {
-            throw new WsException('Todo not found');
-        }
-
-        return todo;
     }
 }
