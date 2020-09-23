@@ -53,7 +53,7 @@ export class TodoGateway implements OnGatewayConnection, OnGatewayDisconnect {
         return { event: 'deletedTodo', data: { message: 'Todo deleted successfully' } };
     }
 
-    @SubscribeMessage('getListOfUSerTodos')
+    @SubscribeMessage('getListOfUserTodos')
     public async handleGetListOfUSerTodos(@MessageBody() getListTodoOfUserDTO: GetListTodoOfUserDTO): Promise<WsResponse<{ todos: Todo[]; total: number }>> {
         const todos = await this.todoService.getListOfUserTodos(getListTodoOfUserDTO);
 
