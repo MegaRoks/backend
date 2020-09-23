@@ -29,7 +29,7 @@ export class UserRepository extends Repository<User> {
         return user;
     }
 
-    public async updateUser(userId: string, updateUserDTO: UpdateUserDTO): Promise<void> {
+    public async updateUser(userId: string, updateUserDTO: UpdateUserDTO): Promise<User> {
         const user = this.create(updateUserDTO);
         await this.createQueryBuilder()
             .update(User)
@@ -39,6 +39,8 @@ export class UserRepository extends Repository<User> {
             .catch(() => {
                 throw new InternalServerErrorException('Error while saving user to database');
             });
+
+        return user;
     }
 
     public async deleteUser(userId: string): Promise<void> {
@@ -154,7 +156,7 @@ export class UserRepository extends Repository<User> {
         return { users, total };
     }
 
-    public async getUserByEmailWithCredentials(email: string) {
+    public async getUserByEmailWithCredentials(email: string): Promise<User> {
         const user = this.createQueryBuilder()
             .select(['u.id', 'u.firstName', 'u.lastName', 'u.email', 'u.isActive', 'u.role', 'u.salt', 'u.password'])
             .from(User, 'u')

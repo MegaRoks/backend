@@ -8,13 +8,14 @@ import { Todo } from './../entity/todo.entity';
 
 @EntityRepository(Todo)
 export class TodoRepository extends Repository<Todo> {
-    public async createTodo(createTodoDTO: CreateTodoDTO): Promise<any> {
-        const todo = this.create(createTodoDTO);
+    public async createTodo(userId: string, createTodoDTO: CreateTodoDTO): Promise<Todo> {
+        const todo = this.create({ userId, ...createTodoDTO });
         await this.createQueryBuilder()
             .insert()
             .into(Todo)
             .values(todo)
             .execute()
+            .then((todo) => todo)
             .catch(() => {
                 throw new WsException('Error while saving user to database');
             });
@@ -22,23 +23,28 @@ export class TodoRepository extends Repository<Todo> {
         return todo;
     }
 
-    public async updateTodo(updateTodoDTO: UpdateTodoDTO): Promise<void> {
+    public async updateTodo(userId: string, updateTodoDTO: UpdateTodoDTO): Promise<Todo> {
         const todo = this.create(updateTodoDTO);
         await this.createQueryBuilder()
             .update(Todo)
             .set(todo)
             .where('id = :todoId', { todoId: todo.id })
+            .andWhere('userId = :userId', { userId })
             .execute()
+            .then((todo) => todo)
             .catch(() => {
                 throw new WsException('Error while saving user to database');
             });
+
+        return todo;
     }
 
-    public async deleteTodo(todoId: string): Promise<void> {
+    public async deleteTodo(userId: string, todoId: string): Promise<void> {
         await this.createQueryBuilder()
             .delete()
             .from(Todo)
             .where('id = :todoId', { todoId })
+            .andWhere('userId = :userId', { userId })
             .execute()
             .catch(() => {
                 throw new WsException('Error while saving user to database');
@@ -67,11 +73,12 @@ export class TodoRepository extends Repository<Todo> {
         return { todos, total };
     }
 
-    public async getTodoById(todoId: string): Promise<Todo> {
+    public async getTodoByTodoIdAndUserId(userId: string, todoId: string): Promise<Todo> {
         const todo = await this.createQueryBuilder()
             .select(['t.id', 't.title', 't.userId'])
             .from(Todo, 't')
-            .where('id = :todoId', { todoId })
+            .where('t.id = :todoId', { todoId })
+            .andWhere('t.userId = :userId', { userId })
             .getOne()
             .then((todo) => todo)
             .catch(() => {

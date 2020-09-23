@@ -16,33 +16,31 @@ export class TodoService {
         private readonly todoRepository: TodoRepository,
     ) {}
 
-    public async createTodo(createTodoDTO: CreateTodoDTO): Promise<Todo> {
-        return await this.todoRepository.createTodo(createTodoDTO);
+    public async createTodo(userId: string, createTodoDTO: CreateTodoDTO): Promise<Todo> {
+        return await this.todoRepository.createTodo(userId, createTodoDTO);
     }
 
-    public async updateTodo(updateTodoDTO: UpdateTodoDTO): Promise<Todo> {
+    public async updateTodo(userId: string, updateTodoDTO: UpdateTodoDTO): Promise<Todo> {
         try {
-            const todo = await this.todoRepository.getTodoById(updateTodoDTO.id);
+            const todo = await this.todoRepository.getTodoByTodoIdAndUserId(userId, updateTodoDTO.id);
 
-            await this.todoRepository.updateTodo(updateTodoDTO);
-
-            return todo;
+            return await this.todoRepository.updateTodo(todo.userId, updateTodoDTO);
         } catch (err) {
             throw new WsException(err.message);
         }
     }
 
-    public async deleteTodo(deleteTodoDTO: DeleteTodoDTO): Promise<void> {
+    public async deleteTodo(userId: string, deleteTodoDTO: DeleteTodoDTO): Promise<void> {
         try {
-            const todo = await this.todoRepository.getTodoById(deleteTodoDTO.id);
+            const todo = await this.todoRepository.getTodoByTodoIdAndUserId(userId, deleteTodoDTO.id);
 
-            await this.todoRepository.deleteTodo(todo.id);
+            await this.todoRepository.deleteTodo(userId, todo.id);
         } catch (err) {
             throw new WsException(err.message);
         }
     }
 
-    public async getListOfUserTodos(getListTodoOfUserDTO: GetListTodoOfUserDTO): Promise<{ todos: Todo[], total: number }> {
+    public async getListOfUserTodos(getListTodoOfUserDTO: GetListTodoOfUserDTO): Promise<{ todos: Todo[]; total: number }> {
         try {
             return await this.todoRepository.getListOfUserTodos(getListTodoOfUserDTO);
         } catch (err) {

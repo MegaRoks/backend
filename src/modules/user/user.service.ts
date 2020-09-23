@@ -27,9 +27,7 @@ export class UserService {
     public async updateUserRole(userId: string, updateUserDTO: UpdateUserDTO): Promise<User> {
         const user = await this.userRepository.getUserById(userId);
 
-        await this.userRepository.updateUser(user.id, updateUserDTO);
-
-        return user;
+        return await this.userRepository.updateUser(user.id, updateUserDTO);
     }
 
     public async updateUser(userId: string, updateUserDTO: UpdateUserDTO): Promise<User> {

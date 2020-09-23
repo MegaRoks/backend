@@ -12,8 +12,4 @@ export class UpdateTodoDTO {
     @MaxLength(maxTitleLength, { message: `The title must be less than ${maxTitleLength} characters` })
     @MinLength(minTitleLength, { message: `The title must be more than ${minTitleLength} characters` })
     public readonly title: string;
-
-    @IsNotEmpty({ message: 'Enter an id of user' })
-    @IsString({ message: 'Please enter an id of user' })
-    public readonly userId: string;
 }
