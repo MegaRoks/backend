@@ -1,4 +1,4 @@
-export const singUpSchema = {
+export const signUpSchema = {
     example: {
         firstName: 'string',
         lastName: 'string',

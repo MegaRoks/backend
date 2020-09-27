@@ -6,12 +6,12 @@ import { CreateUserDTO } from './../user/dto/createUser.dto';
 import { ConfirmEmailDTO } from './dto/confirmEmai.dto';
 import { CredentialsDTO } from './dto/credentials.dto';
 import { ResetPasswordDTO } from './dto/resetPassword';
-import { SignInDTO } from './dto/singIn.dro';
-import { SingUpDTO } from './dto/singUp.dto';
+import { SignInDTO } from './dto/signIn.dro';
+import { SignUpDTO } from './dto/signUp.dto';
 import { ChangePasswordDTO } from './dto/changePassword.dto';
 import { resetPasswordSchema } from './schema/resetPassword.schema';
 import { signInSchema } from './schema/signIn.schema';
-import { singUpSchema } from './schema/singUp.schema';
+import { signUpSchema } from './schema/signUp.schema';
 import { confirmEmailSchema } from './schema/confirmEmail.schema';
 
 
@@ -32,13 +32,13 @@ export class AuthController {
         return await this.authService.signIn(credentialsDTO);
     }
 
-    @Post('/sing-up')
+    @Post('/sign-up')
     @ApiOkResponse({
-        type: SingUpDTO,
-        description: 'Sing Up method',
+        type: SignUpDTO,
+        description: 'sign Up method',
     })
-    @ApiBody({ schema: singUpSchema })
-    public async signUp(@Body(ValidationPipe) createUserDTO: CreateUserDTO): Promise<SingUpDTO> {
+    @ApiBody({ schema: signUpSchema })
+    public async signUp(@Body(ValidationPipe) createUserDTO: CreateUserDTO): Promise<SignUpDTO> {
         const user = await this.authService.signUp(createUserDTO);
         return {
             user,
