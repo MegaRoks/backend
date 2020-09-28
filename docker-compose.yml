@@ -41,15 +41,6 @@ services:
             - .env
         networks:
             - webnet
-    
-    adminer:
-        container_name: adminer
-        restart: always
-        image: adminer:4.7.7
-        ports:
-            - ${CLIENT_DATABASE_PORT}:${CLIENT_DATABASE_PORT}
-        networks:
-            - webnet
 
 networks:
     webnet:

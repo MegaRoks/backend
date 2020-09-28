@@ -25,6 +25,7 @@ export class UserController {
     constructor(private usersService: UserService) {}
 
     @Post('/create')
+    @Role(UserRoleType.ADMIN)
     @ApiOkResponse({
         type: ReturnUserDTO,
         description: 'The method for create users',
