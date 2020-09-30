@@ -13,7 +13,7 @@ export class MailService {
             template: 'confirmation-email',
             context: {
                 token,
-                url: process.env.SERVER_URL,
+                url: process.env.CLIENT_URL,
             },
         };
         await this.sendMail(mail);
@@ -27,7 +27,7 @@ export class MailService {
             template: 'reset-password',
             context: {
                 token,
-                url: process.env.SERVER_URL,
+                url: process.env.CLIENT_URL,
             },
         };
         await this.sendMail(mail);
