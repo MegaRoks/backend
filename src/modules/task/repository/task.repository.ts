@@ -5,6 +5,7 @@ import { DeleteTaskDTO } from './../dto/deleteTask.dto';
 import { CreateTaskDTO } from './../dto/createTask.dto';
 import { GetTasksListDTO } from './../dto/getTasksList.dto';
 import { UpdateTaskDTO } from './../dto/updateTask.dto';
+import { FilterTasksDTO } from './../dto/filterTasks.dto';
 import { Task } from './../entity/task.entity';
 
 @EntityRepository(Task)
@@ -69,7 +70,7 @@ export class TaskRepository extends Repository<Task> {
             });
     }
 
-    public async getTasksList(getListTasksDTO: GetTasksListDTO): Promise<{ tasks: any[]; total: number }> {
+    public async getTasksList(getListTasksDTO: GetTasksListDTO): Promise<FilterTasksDTO> {
         const { userId, todoId, sort, page, limit } = getListTasksDTO;
         const query = this.createQueryBuilder();
 

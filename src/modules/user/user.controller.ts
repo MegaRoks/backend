@@ -8,6 +8,7 @@ import { ReturnUserDTO } from './dto/returnUser.dto';
 import { UpdateUserDTO } from './dto/updateUser.dto';
 import { DeleteUserDTO } from './dto/deleteUser.dto';
 import { FindUsersDTO } from './dto/findUsers.dto';
+import { FilterUsersDTO } from './dto/filterUsers.dto';
 import { createUserSchema } from './schema/createUser.schema';
 import { changeUserRoleSchema } from './schema/changeUserRole.schema';
 import { updateUserSchema } from './schema/updateUser.schema';
@@ -16,6 +17,7 @@ import { GetUser } from './decorators/getUser.decorator';
 import { RolesGuard } from './../auth/role.guard';
 import { UserRoleType } from './types/userRole.type';
 import { User } from './entity/user.entity';
+
 
 @ApiTags('user')
 @ApiBearerAuth()
@@ -101,11 +103,7 @@ export class UserController {
     @ApiQuery({ name: 'sort', required: false })
     @ApiQuery({ name: 'page', required: false })
     @ApiQuery({ name: 'limit', required: false })
-    public async findUsers(@Query() query: FindUsersDTO): Promise<{ users: User[]; total: number; message: string }> {
-        const found = await this.usersService.findUsers(query);
-        return {
-            ...found,
-            message: 'Users found',
-        };
+    public async findUsers(@Query() query: FindUsersDTO): Promise<FilterUsersDTO> {
+        return await this.usersService.findUsers(query);
     }
 }

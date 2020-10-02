@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { WsException } from '@nestjs/websockets';
 import { CreateTaskDTO } from './dto/createTask.dto';
 import { DeleteTaskDTO } from './dto/deleteTask.dto';
+import { FilterTasksDTO } from './dto/filterTasks.dto';
 import { GetTasksListDTO } from './dto/getTasksList.dto';
 import { UpdateTaskDTO } from './dto/updateTask.dto';
 import { Task } from './entity/task.entity';
@@ -48,7 +49,7 @@ export class TaskService {
         }
     }
 
-    public async getTasksList(getListTaskOfUserDTO: GetTasksListDTO): Promise<{ tasks: Task[]; total: number }> {
+    public async getTasksList(getListTaskOfUserDTO: GetTasksListDTO): Promise<FilterTasksDTO> {
         try {
             return await this.taskRepository.getTasksList(getListTaskOfUserDTO);
         } catch (err) {

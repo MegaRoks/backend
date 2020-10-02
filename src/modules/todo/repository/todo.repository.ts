@@ -5,6 +5,7 @@ import { GetTodosListDTO } from './../dto/getTodosList.dto';
 import { UpdateTodoDTO } from './../dto/updateTodo.dto';
 import { CreateTodoDTO } from './../dto/createTodo.dto';
 import { DeleteTodoDTO } from './../dto/deleteTodo.dto';
+import { FilerTodosDTO } from '../dto/filterTodos.dto';
 import { Todo } from './../entity/todo.entity';
 
 @EntityRepository(Todo)
@@ -53,7 +54,7 @@ export class TodoRepository extends Repository<Todo> {
             });
     }
 
-    public async getTodosList(getListTodosDTO: GetTodosListDTO): Promise<{ todos: Todo[]; total: number }> {
+    public async getTodosList(getListTodosDTO: GetTodosListDTO): Promise<FilerTodosDTO> {
         const { userId, sort, page, limit } = getListTodosDTO;
         const query = this.createQueryBuilder();
 

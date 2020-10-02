@@ -6,7 +6,9 @@ import { UserRepository } from './repository/user.repository';
 import { CreateUserDTO } from './dto/createUser.dto';
 import { UpdateUserDTO } from './dto/updateUser.dto';
 import { FindUsersDTO } from './dto/findUsers.dto';
+import { FilterUsersDTO } from './dto/filterUsers.dto';
 import { MailService } from './../mail/mail.service';
+
 
 @Injectable()
 export class UserService {
@@ -66,7 +68,7 @@ export class UserService {
         await this.userRepository.deleteUser(user.id);
     }
 
-    public async findUsers(queryDTO: FindUsersDTO): Promise<{ users: User[]; total: number }> {
+    public async findUsers(queryDTO: FindUsersDTO): Promise<FilterUsersDTO> {
         return await this.userRepository.findUsers(queryDTO);
     }
 }

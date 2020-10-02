@@ -5,13 +5,14 @@ import { User } from './../entity/user.entity';
 import { CreateUserDTO } from './../dto/createUser.dto';
 import { UpdateUserDTO } from './../dto/updateUser.dto';
 import { FindUsersDTO } from './../dto/findUsers.dto';
+import { FilterUsersDTO } from './../dto/filterUsers.dto';
 
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
     public async createUser(createUserDTO: CreateUserDTO): Promise<User> {
         const user = this.create(createUserDTO);
         console.log(user);
-        
+
         await this.createQueryBuilder()
             .insert()
             .into(User)
@@ -130,7 +131,7 @@ export class UserRepository extends Repository<User> {
         return user;
     }
 
-    public async findUsers(queryDTO: FindUsersDTO): Promise<{ users: User[]; total: number }> {
+    public async findUsers(queryDTO: FindUsersDTO): Promise<FilterUsersDTO> {
         const { firstName, lastName, email, isActive, role, sort, page, limit } = queryDTO;
         const query = this.createQueryBuilder();
 

@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { WsException } from '@nestjs/websockets';
 import { CreateCategoryDTO } from './dto/createCategory.dto';
 import { DeleteCategoryDTO } from './dto/deleteCategory.dto';
+import { FilterCategoriesDTO } from './dto/filterCategories.dto';
 import { GetCategoriesListDTO } from './dto/getCategoriesList.dto';
 import { UpdateCategoryDTO } from './dto/updateCategory.dto';
 import { Category } from './entity/category.entity';
@@ -48,7 +49,7 @@ export class CategoryService {
         }
     }
 
-    public async getCategoriesList(getListCategoriesDTO: GetCategoriesListDTO): Promise<{ categories: any[]; total: number }> {
+    public async getCategoriesList(getListCategoriesDTO: GetCategoriesListDTO): Promise<FilterCategoriesDTO> {
         try {
             return await this.categoryRepository.getCategoriesList(getListCategoriesDTO);
         } catch (err) {

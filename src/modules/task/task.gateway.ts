@@ -8,8 +8,10 @@ import { CreateTaskDTO } from './dto/createTask.dto';
 import { DeleteTaskDTO } from './dto/deleteTask.dto';
 import { GetTasksListDTO } from './dto/getTasksList.dto';
 import { UpdateTaskDTO } from './dto/updateTask.dto';
+import { FilterTasksDTO } from './dto/filterTasks.dto';
 import { Task } from './entity/task.entity';
 import { TaskService } from './task.service';
+
 
 @UseGuards(TokenGuard)
 @WebSocketGateway()
@@ -46,7 +48,7 @@ export class TaskGateway {
     }
 
     @SubscribeMessage('getTasksList')
-    public async handleGetTasksList(@MessageData() getListTasksDTO: GetTasksListDTO): Promise<WsResponse<{ tasks: Task[]; total: number }>> {
+    public async handleGetTasksList(@MessageData() getListTasksDTO: GetTasksListDTO): Promise<WsResponse<FilterTasksDTO>> {
         const tasks = await this.taskService.getTasksList(getListTasksDTO);
 
         return { event: 'gotTasksList', data: tasks };

@@ -4,6 +4,7 @@ import { DeleteCategoryDTO } from './../dto/deleteCategory.dto';
 import { CreateCategoryDTO } from './../dto/createCategory.dto';
 import { GetCategoriesListDTO } from './../dto/getCategoriesList.dto';
 import { UpdateCategoryDTO } from './../dto/updateCategory.dto';
+import { FilterCategoriesDTO } from './../dto/filterCategories.dto';
 import { Category } from './../entity/category.entity';
 
 @EntityRepository(Category)
@@ -67,9 +68,9 @@ export class CategoryRepository extends Repository<Category> {
             });
     }
 
-    public async getCategoriesList(getListCategoryOfUserDTO: GetCategoriesListDTO): Promise<{ categories: Category[]; total: number }> {
+    public async getCategoriesList(getListCategoryOfUserDTO: GetCategoriesListDTO): Promise<FilterCategoriesDTO> {
         console.log('a', getListCategoryOfUserDTO);
-        
+
         const { userId, sort, page, limit } = getListCategoryOfUserDTO;
         const query = this.createQueryBuilder();
 
@@ -94,7 +95,7 @@ export class CategoryRepository extends Repository<Category> {
             });
 
         console.log(categories, total);
-        
+
         return { categories, total };
     }
 }

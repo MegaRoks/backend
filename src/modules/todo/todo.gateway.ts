@@ -8,6 +8,7 @@ import { CreateTodoDTO } from './dto/createTodo.dto';
 import { DeleteTodoDTO } from './dto/deleteTodo.dto';
 import { GetTodosListDTO } from './dto/getTodosList.dto';
 import { UpdateTodoDTO } from './dto/updateTodo.dto';
+import { FilerTodosDTO } from './dto/filterTodos.dto';
 import { Todo } from './entity/todo.entity';
 import { TodoService } from './todo.service';
 
@@ -27,28 +28,24 @@ export class TodoGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @SubscribeMessage('createTodo')
     public async handleCreateTodo(@MessageData() createTodoDTO: CreateTodoDTO): Promise<WsResponse<Todo>> {
         const todo = await this.todoService.createTodo(createTodoDTO);
-
         return { event: 'createdTodo', data: todo };
     }
 
     @SubscribeMessage('updateTodo')
     public async handleUpdateTodo(@MessageData() updateTodoDTO: UpdateTodoDTO): Promise<WsResponse<Todo>> {
         const todo = await this.todoService.updateTodo(updateTodoDTO);
-
         return { event: 'updatedTodo', data: todo };
     }
 
     @SubscribeMessage('deleteTodo')
     public async handleDeleteTodo(@MessageData() deleteTodoDTO: DeleteTodoDTO): Promise<WsResponse<{ message: string }>> {
         await this.todoService.deleteTodo(deleteTodoDTO);
-
         return { event: 'deletedTodo', data: { message: 'Todo deleted successfully' } };
     }
 
     @SubscribeMessage('getTodosList')
-    public async handleGetTodosList(@MessageData() getListTodosDTO: GetTodosListDTO): Promise<WsResponse<{ todos: Todo[]; total: number }>> {
+    public async handleGetTodosList(@MessageData() getListTodosDTO: GetTodosListDTO): Promise<WsResponse<FilerTodosDTO>> {
         const todos = await this.todoService.getTodosList(getListTodosDTO);
-
         return { event: 'gotTodosList', data: todos };
     }
 }
