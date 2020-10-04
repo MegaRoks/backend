@@ -1,4 +1,5 @@
 import { IsString, MinLength, MaxLength, Matches } from 'class-validator';
+
 import { match, maxPasswordLength, minPasswordLength } from './../../user/constants/userConstants';
 
 export class ChangePasswordDTO {

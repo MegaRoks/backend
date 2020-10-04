@@ -11,8 +11,6 @@ import { FilterUsersDTO } from './../dto/filterUsers.dto';
 export class UserRepository extends Repository<User> {
     public async createUser(createUserDTO: CreateUserDTO): Promise<User> {
         const user = this.create(createUserDTO);
-        console.log(user);
-
         await this.createQueryBuilder()
             .insert()
             .into(User)

@@ -69,8 +69,6 @@ export class CategoryRepository extends Repository<Category> {
     }
 
     public async getCategoriesList(getListCategoryOfUserDTO: GetCategoriesListDTO): Promise<FilterCategoriesDTO> {
-        console.log('a', getListCategoryOfUserDTO);
-
         const { userId, sort, page, limit } = getListCategoryOfUserDTO;
         const query = this.createQueryBuilder();
 
@@ -93,8 +91,6 @@ export class CategoryRepository extends Repository<Category> {
             .catch(() => {
                 throw new WsException('Error while saving user to database');
             });
-
-        console.log(categories, total);
 
         return { categories, total };
     }
