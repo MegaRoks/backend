@@ -25,24 +25,24 @@ export class TaskRepository extends Repository<Task> {
         return task;
     }
 
-    public async updateTask(updateTaskDTO: UpdateTaskDTO): Promise<any> {
+    public async updateTask(updateTaskDTO: UpdateTaskDTO): Promise<Task> {
         const task = this.create(updateTaskDTO);
         await this.createQueryBuilder()
             .update(Task)
             .set(task)
             .where('id = :taskId', { taskId: task.id })
-            .andWhere('todoId = :todoId', { todoIdd: task.todoId })
-            .andWhere('userId = :userId', { userIdd: task.userId })
+            .andWhere('todoId = :todoId', { todoId: task.todoId })
+            .andWhere('userId = :userId', { userId: task.userId })
             .execute()
             .then((task) => task)
             .catch(() => {
                 throw new WsException('Error while saving user to database');
             });
-
+        
         return task;
     }
 
-    public async deleteTask(deleteTaskDTO: DeleteTaskDTO): Promise<void> {
+    public async deleteTask(deleteTaskDTO: DeleteTaskDTO): Promise<Task> {
         const task = this.create(deleteTaskDTO);
         await this.createQueryBuilder()
             .delete()
@@ -54,6 +54,7 @@ export class TaskRepository extends Repository<Task> {
             .catch(() => {
                 throw new WsException('Error while saving user to database');
             });
+        return task;
     }
 
     public async getTaskBy(taskId: string, todoId: string, userId: string): Promise<Task | undefined> {
@@ -74,7 +75,7 @@ export class TaskRepository extends Repository<Task> {
         const { userId, todoId, sort, page, limit } = getListTasksDTO;
         const query = this.createQueryBuilder();
 
-        query.select(['t.id', 't.title', 't.todoId', 't.status']);
+        query.select(['t']);
         query.from(Task, 't');
         query.where('t.todoId = :todoId', { todoId });
         query.andWhere('t.userId = :userId', { userId });

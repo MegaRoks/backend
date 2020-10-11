@@ -35,7 +35,7 @@ export class TaskService {
         }
     }
 
-    public async deleteTask(deleteTaskDTO: DeleteTaskDTO): Promise<void> {
+    public async deleteTask(deleteTaskDTO: DeleteTaskDTO): Promise<Task> {
         try {
             const task = await this.taskRepository.getTaskBy(deleteTaskDTO.id, deleteTaskDTO.todoId, deleteTaskDTO.userId);
 
@@ -43,7 +43,7 @@ export class TaskService {
                 throw new WsException('Todo not found');
             }
 
-            await this.taskRepository.deleteTask(deleteTaskDTO);
+            return await this.taskRepository.deleteTask(deleteTaskDTO);
         } catch (err) {
             throw new WsException(err.message);
         }
