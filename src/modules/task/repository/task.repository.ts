@@ -31,8 +31,8 @@ export class TaskRepository extends Repository<Task> {
             .update(Task)
             .set(task)
             .where('id = :taskId', { taskId: task.id })
-            .andWhere('todoId = :todoId', { todoIdd: task.todoId })
-            .andWhere('userId = :userId', { userIdd: task.userId })
+            .andWhere('todoId = :todoId', { todoId: task.todoId })
+            .andWhere('userId = :userId', { userId: task.userId })
             .execute()
             .then((task) => task)
             .catch(() => {

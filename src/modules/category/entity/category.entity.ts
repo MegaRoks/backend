@@ -14,7 +14,7 @@ export class Category {
     @Column({ type: 'varchar', nullable: false })
     public readonly userId: string;
 
-    @OneToMany(() => Todo, (todo: Todo) => todo.category)
+    @OneToMany(() => Todo, (todo: Todo) => todo.category, { cascade: ['remove'] })
     public readonly todos: Todo[];
 
     @ManyToOne(() => User, (user: User) => user.categories)
