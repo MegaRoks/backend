@@ -40,7 +40,7 @@ export class CategoryRepository extends Repository<Category> {
         return category;
     }
 
-    public async deleteCategory(deleteCategoryDTO: DeleteCategoryDTO): Promise<void> {
+    public async deleteCategory(deleteCategoryDTO: DeleteCategoryDTO): Promise<Category> {
         const category = this.create(deleteCategoryDTO);
         await this.createQueryBuilder()
             .delete()
@@ -51,14 +51,13 @@ export class CategoryRepository extends Repository<Category> {
             .catch(() => {
                 throw new WsException('Error while saving user to database');
             });
+        return category;
     }
 
     public async getCategory(categoryId: string, userId: string): Promise<Category | undefined> {
         return await this.createQueryBuilder()
-            .select(['t'])
-            .from(Category, 't')
-            .leftJoinAndSelect('c.tasks', 'task')
-            .leftJoinAndSelect('c.todos', 'todo')
+            .select(['c'])
+            .from(Category, 'c')
             .where('c.id = :categoryId', { categoryId })
             .andWhere('c.userId = :userId', { userId })
             .getOne()

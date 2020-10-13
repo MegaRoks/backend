@@ -12,7 +12,6 @@ import { UpdateCategoryDTO } from './dto/updateCategory.dto';
 import { FilterCategoriesDTO } from './dto/filterCategories.dto';
 import { Category } from './entity/category.entity';
 
-
 @UseGuards(TokenGuard)
 @WebSocketGateway()
 export class CategoryGateway {
@@ -39,9 +38,9 @@ export class CategoryGateway {
     }
 
     @SubscribeMessage('deleteCategory')
-    public async handleDeleteCategory(@MessageData() deleteCategoryDTO: DeleteCategoryDTO): Promise<WsResponse<{ message: string }>> {
-        await this.categoryService.deleteCategory(deleteCategoryDTO);
-        return { event: 'deletedCategory', data: { message: 'Category deleted successfully' } };
+    public async handleDeleteCategory(@MessageData() deleteCategoryDTO: DeleteCategoryDTO): Promise<WsResponse<Category>> {
+        const category = await this.categoryService.deleteCategory(deleteCategoryDTO);
+        return { event: 'deletedCategory', data: category };
     }
 
     @SubscribeMessage('getCategoriesList')

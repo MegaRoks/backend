@@ -35,7 +35,7 @@ export class CategoryService {
         }
     }
 
-    public async deleteCategory(deleteCategoryDTO: DeleteCategoryDTO): Promise<void> {
+    public async deleteCategory(deleteCategoryDTO: DeleteCategoryDTO): Promise<Category> {
         try {
             const category = await this.categoryRepository.getCategory(deleteCategoryDTO.id, deleteCategoryDTO.userId);
 
@@ -43,7 +43,7 @@ export class CategoryService {
                 throw new WsException('Todo not found');
             }
 
-            await this.categoryRepository.deleteCategory(deleteCategoryDTO);
+            return await this.categoryRepository.deleteCategory(deleteCategoryDTO);
         } catch (err) {
             throw new WsException(err.message);
         }
